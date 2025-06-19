@@ -9,6 +9,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import FindTherapists from "./pages/FindTherapists";
 import HowItWorks from "./pages/HowItWorks";
+import ParaTerapeutas from "./pages/ParaTerapeutas";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/encontrar-terapeutas" element={<FindTherapists />} />
             <Route path="/como-funciona" element={<HowItWorks />} />
+            <Route path="/para-terapeutas" element={<ParaTerapeutas />} />
             <Route 
               path="/login" 
               element={

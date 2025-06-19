@@ -125,9 +125,11 @@ const Index = () => {
                 Encontrar Terapeuta
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
-              Sou Terapeuta
-            </Button>
+            <Link to="/para-terapeutas">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
+                Sou Terapeuta
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

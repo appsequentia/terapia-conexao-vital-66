@@ -38,7 +38,7 @@ const Header = () => {
             <Link to="/como-funciona" className="text-gray-700 hover:text-primary transition-colors">
               Como Funciona
             </Link>
-            <Link to="#" className="text-gray-700 hover:text-primary transition-colors">
+            <Link to="/para-terapeutas" className="text-gray-700 hover:text-primary transition-colors">
               Para Terapeutas
             </Link>
           </nav>
@@ -107,7 +107,7 @@ const Header = () => {
                 Como Funciona
               </Link>
               <Link
-                to="#"
+                to="/para-terapeutas"
                 className="text-gray-700 hover:text-primary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
