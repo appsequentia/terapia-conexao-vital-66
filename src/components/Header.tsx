@@ -35,7 +35,7 @@ const Header = () => {
             <Link to="/encontrar-terapeutas" className="text-gray-700 hover:text-primary transition-colors">
               Encontrar Terapeutas
             </Link>
-            <Link to="#" className="text-gray-700 hover:text-primary transition-colors">
+            <Link to="/como-funciona" className="text-gray-700 hover:text-primary transition-colors">
               Como Funciona
             </Link>
             <Link to="#" className="text-gray-700 hover:text-primary transition-colors">
@@ -100,7 +100,7 @@ const Header = () => {
                 Encontrar Terapeutas
               </Link>
               <Link
-                to="#"
+                to="/como-funciona"
                 className="text-gray-700 hover:text-primary transition-colors"
                 onClick={() => setIsMenuOpen(false)}
               >
