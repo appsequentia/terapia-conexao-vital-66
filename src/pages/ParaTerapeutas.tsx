@@ -1,4 +1,3 @@
-
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -71,9 +70,10 @@ const ParaTerapeutas = () => {
   ];
 
   const requirements = [
-    "Registro ativo no Conselho Regional de Psicologia (CRP)",
-    "Formação em Psicologia reconhecida pelo MEC",
-    "Experiência mínima de 6 meses em atendimento clínico",
+    "Formação em Psicologia, Terapias Integrativas ou áreas relacionadas",
+    "Certificações válidas na sua área de atuação terapêutica",
+    "Experiência mínima de 6 meses em atendimento terapêutico",
+    "Documentação profissional apropriada (CRP, certificados, diplomas)",
     "Disponibilidade para atendimentos online ou presenciais"
   ];
 
@@ -100,12 +100,12 @@ const ParaTerapeutas = () => {
 
   const faqs = [
     {
-      question: "Qual é a taxa da plataforma?",
-      answer: "Cobramos uma taxa de 15% sobre o valor de cada consulta realizada. Sem taxas de cadastro ou mensalidades."
+      question: "Qual é o valor da mensalidade e taxas?",
+      answer: "Cobramos R$ 36,90 por mês para acesso completo à plataforma e 3% sobre o valor de cada consulta realizada."
     },
     {
       question: "Como funciona o processo de verificação?",
-      answer: "Analisamos seus documentos profissionais (CRP, diplomas) e validamos sua experiência. O processo leva até 48 horas."
+      answer: "Analisamos seus documentos profissionais (certificados, diplomas, registros) e validamos sua experiência. O processo leva até 48 horas."
     },
     {
       question: "Quando recebo os pagamentos?",
@@ -118,6 +118,10 @@ const ParaTerapeutas = () => {
     {
       question: "É obrigatório atender online?",
       answer: "Não. Você pode escolher entre atendimento online, presencial ou ambos, conforme sua preferência."
+    },
+    {
+      question: "Preciso ter registro no CRP?",
+      answer: "Não necessariamente. Aceitamos psicólogos com CRP e também terapeutas integrativos com certificações válidas em suas áreas de atuação."
     },
     {
       question: "Há suporte técnico disponível?",
@@ -228,7 +232,7 @@ const ParaTerapeutas = () => {
                 Documentação Necessária
               </CardTitle>
               <CardDescription>
-                Para garantir a qualidade dos serviços, solicitamos:
+                Aceitamos diversos profissionais da área terapêutica:
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -285,32 +289,57 @@ const ParaTerapeutas = () => {
             Valores Transparentes
           </h2>
           
-          <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-accent/20">
-            <CardContent className="p-8">
-              <div className="text-4xl font-bold text-primary mb-4">15%</div>
-              <p className="text-xl text-gray-700 mb-4">
-                Taxa única sobre consultas realizadas
-              </p>
-              <ul className="text-left space-y-2 text-gray-600 max-w-md mx-auto">
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                  Sem taxa de cadastro
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                  Sem mensalidade
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                  Pagamentos semanais
-                </li>
-                <li className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                  Suporte técnico incluído
-                </li>
-              </ul>
-            </CardContent>
-          </Card>
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-accent/20">
+              <CardContent className="p-8">
+                <div className="text-4xl font-bold text-primary mb-4">R$ 36,90</div>
+                <p className="text-xl text-gray-700 mb-4">
+                  Mensalidade para acesso completo
+                </p>
+                <ul className="text-left space-y-2 text-gray-600">
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
+                    Acesso total à plataforma
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
+                    Gestão de agenda
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
+                    Suporte técnico incluído
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-accent/20">
+              <CardContent className="p-8">
+                <div className="text-4xl font-bold text-primary mb-4">3%</div>
+                <p className="text-xl text-gray-700 mb-4">
+                  Taxa sobre consultas realizadas
+                </p>
+                <ul className="text-left space-y-2 text-gray-600">
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
+                    Taxa muito competitiva
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
+                    Pagamentos semanais
+                  </li>
+                  <li className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
+                    Processamento automático
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Modelo de preços justo e transparente, ideal para profissionais que querem crescer sem grandes investimentos iniciais.
+          </p>
         </div>
       </section>
 
