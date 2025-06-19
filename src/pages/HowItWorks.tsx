@@ -198,11 +198,13 @@ const HowItWorks = () => {
               <p className="text-gray-600">Agende consultas quando e onde for conveniente, com opções online e presenciais.</p>
             </div>
 
-            <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
-              <CreditCard className="h-8 w-8 text-primary" />
+            <div className="text-center">
+              <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                <CreditCard className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Pagamento Simplificado</h3>
+              <p className="text-gray-600">Sistema de pagamento integrado, seguro e com várias opções de pagamento disponíveis.</p>
             </div>
-            <h3 className="text-lg font-semibold mb-2">Pagamento Simplificado</h3>
-            <p className="text-gray-600">Sistema de pagamento integrado, seguro e com várias opções de pagamento disponíveis.</p>
           </div>
         </div>
       </section>
