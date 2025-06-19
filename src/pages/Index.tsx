@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import TherapistCard from '@/components/TherapistCard';
@@ -100,9 +101,11 @@ const Index = () => {
           </div>
 
           <div className="text-center">
-            <Button size="lg" className="bg-primary hover:bg-primary/90">
-              Ver Todos os Terapeutas
-            </Button>
+            <Link to="/encontrar-terapeutas">
+              <Button size="lg" className="bg-primary hover:bg-primary/90">
+                Ver Todos os Terapeutas
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -117,9 +120,11 @@ const Index = () => {
             Milhares de pessoas já encontraram ajuda através da nossa plataforma
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-gray-100">
-              Encontrar Terapeuta
-            </Button>
+            <Link to="/encontrar-terapeutas">
+              <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-gray-100">
+                Encontrar Terapeuta
+              </Button>
+            </Link>
             <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
               Sou Terapeuta
             </Button>
@@ -140,7 +145,7 @@ const Index = () => {
             <div>
               <h3 className="font-semibold mb-4">Para Pacientes</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Encontrar Terapeuta</a></li>
+                <li><Link to="/encontrar-terapeutas" className="hover:text-white">Encontrar Terapeuta</Link></li>
                 <li><a href="#" className="hover:text-white">Como Funciona</a></li>
                 <li><a href="#" className="hover:text-white">Preços</a></li>
               </ul>

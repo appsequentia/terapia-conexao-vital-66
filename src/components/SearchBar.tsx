@@ -4,9 +4,25 @@ import { Search, MapPin, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-const SearchBar = () => {
+interface SearchBarProps {
+  onSearch?: (query: string, location: string) => void;
+}
+
+const SearchBar = ({ onSearch }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
+
+  const handleSearch = () => {
+    if (onSearch) {
+      onSearch(searchQuery, location);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
@@ -19,6 +35,7 @@ const SearchBar = () => {
             placeholder="Busque por especialidade, nome ou abordagem..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={handleKeyPress}
             className="pl-10 search-input"
           />
         </div>
@@ -31,18 +48,16 @@ const SearchBar = () => {
             placeholder="Localização"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
+            onKeyPress={handleKeyPress}
             className="pl-10 search-input"
           />
         </div>
 
-        {/* Filter Button */}
-        <Button variant="outline" className="lg:w-auto">
-          <Filter className="h-4 w-4 mr-2" />
-          Filtros
-        </Button>
-
         {/* Search Button */}
-        <Button className="lg:w-auto bg-primary hover:bg-primary/90">
+        <Button 
+          className="lg:w-auto bg-primary hover:bg-primary/90"
+          onClick={handleSearch}
+        >
           <Search className="h-4 w-4 mr-2" />
           Buscar
         </Button>

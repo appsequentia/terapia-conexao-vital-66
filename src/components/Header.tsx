@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Search, Menu, User, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,16 +13,16 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <div className="text-2xl font-bold text-primary">
+            <Link to="/" className="text-2xl font-bold text-primary">
               Sequentia
-            </div>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-gray-700 hover:text-primary transition-colors">
+            <Link to="/encontrar-terapeutas" className="text-gray-700 hover:text-primary transition-colors">
               Encontrar Terapeutas
-            </a>
+            </Link>
             <a href="#" className="text-gray-700 hover:text-primary transition-colors">
               Como Funciona
             </a>
@@ -58,9 +59,9 @@ const Header = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <nav className="flex flex-col space-y-2">
-              <a href="#" className="text-gray-700 hover:text-primary py-2">
+              <Link to="/encontrar-terapeutas" className="text-gray-700 hover:text-primary py-2">
                 Encontrar Terapeutas
-              </a>
+              </Link>
               <a href="#" className="text-gray-700 hover:text-primary py-2">
                 Como Funciona
               </a>
