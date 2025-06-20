@@ -42,7 +42,6 @@ export const useAuth = () => {
 // Função para limpar estado de auth
 const cleanupAuthState = () => {
   console.log('Cleaning up auth state...');
-  // Limpar chaves do localStorage
   Object.keys(localStorage).forEach((key) => {
     if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
       console.log('Removing localStorage key:', key);
@@ -50,7 +49,6 @@ const cleanupAuthState = () => {
     }
   });
   
-  // Limpar chaves do sessionStorage se existir
   if (typeof sessionStorage !== 'undefined') {
     Object.keys(sessionStorage).forEach((key) => {
       if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
@@ -135,7 +133,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('Profile fetched:', data);
 
-      // Fazer type assertion para garantir o tipo correto
       const profileData: UserProfile = {
         ...data,
         tipo_usuario: data.tipo_usuario as 'client' | 'therapist'
@@ -150,15 +147,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     console.log('Setting up auth state listener...');
     
+    // Timeout de segurança para evitar loading infinito
+    const loadingTimeout = setTimeout(() => {
+      console.log('Loading timeout reached, forcing loading to false');
+      setIsLoading(false);
+    }, 10000); // 10 segundos
+
     // Configurar listener para mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
+        clearTimeout(loadingTimeout);
+        
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Buscar perfil do usuário com delay para evitar deadlock
           setTimeout(() => {
             fetchUserProfile(session.user.id);
           }, 100);
@@ -191,6 +195,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (error) {
         console.error('Error in checkSession:', error);
       } finally {
+        clearTimeout(loadingTimeout);
         setIsLoading(false);
       }
     };
@@ -199,6 +204,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     return () => {
       console.log('Cleaning up auth listener');
+      clearTimeout(loadingTimeout);
       subscription.unsubscribe();
     };
   }, []);
@@ -208,10 +214,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
-      // Limpar estado antes do login
       cleanupAuthState();
       
-      // Tentar logout global primeiro
       try {
         await supabase.auth.signOut({ scope: 'global' });
         console.log('Global signout completed');
@@ -231,9 +235,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('Login successful:', !!data.user);
       
-      // Aguardar perfil do usuário e redirecionar
       if (data.user) {
-        // Buscar perfil para redirecionamento
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -242,7 +244,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (profileError) {
           console.error('Error fetching profile for redirect:', profileError);
-          // Se não conseguir buscar perfil, redirecionar para home
           setTimeout(() => {
             window.location.href = '/';
           }, 500);
@@ -252,7 +253,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             tipo_usuario: profileData.tipo_usuario as 'client' | 'therapist'
           };
           
-          // Redirecionar baseado no tipo de usuário
           setTimeout(() => {
             redirectUserAfterLogin(profile);
           }, 500);
@@ -270,7 +270,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     
     try {
-      // Limpar estado antes do registro
       cleanupAuthState();
       
       const redirectUrl = `${window.location.origin}/`;
@@ -295,15 +294,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('Registration successful:', !!authData.user);
       
-      // Aguardar um pouco para que o trigger crie o perfil
       if (authData.user && !authData.session) {
-        // Usuário precisa confirmar email
         console.log('User needs to confirm email');
       } else if (authData.user && authData.session) {
-        // Login automático - aguardar criação do perfil
         console.log('Auto-login successful, waiting for profile creation');
         
-        // Aguardar alguns segundos para o trigger criar o perfil
         setTimeout(() => {
           if (data.type === 'therapist') {
             window.location.href = '/perfil-terapeuta';
@@ -323,10 +318,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('Logging out...');
       
-      // Limpar estado primeiro
       cleanupAuthState();
       
-      // Tentar logout global
       try {
         await supabase.auth.signOut({ scope: 'global' });
         console.log('Global logout successful');
@@ -334,18 +327,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.warn('Global signout failed:', err);
       }
       
-      // Limpar estado local
       setUser(null);
       setProfile(null);
       setSession(null);
       
-      // Forçar refresh da página
       setTimeout(() => {
         window.location.href = '/';
       }, 500);
     } catch (error) {
       console.error('Logout error:', error);
-      // Mesmo se der erro, limpar estado local e redirecionar
       setUser(null);
       setProfile(null);
       setSession(null);
