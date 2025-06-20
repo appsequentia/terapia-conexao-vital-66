@@ -27,7 +27,8 @@ export const useTherapistProfile = () => {
         throw new Error('Usuário não autenticado');
       }
 
-      console.log('Saving therapist profile:', data);
+      console.log('Saving therapist profile for user:', user.id);
+      console.log('Profile data:', data);
 
       // Inserir dados na tabela terapeutas
       const { data: result, error } = await supabase
@@ -42,8 +43,7 @@ export const useTherapistProfile = () => {
           abordagens: data.abordagens,
           cidade: data.cidade,
           price_per_session: data.price_per_session,
-          // Serializar formação como JSON
-          formacao: JSON.stringify(data.formacao),
+          formacao: data.formacao, // Agora é JSONB, não precisa serializar
           offers_online: true,
           offers_in_person: true,
           is_online: true,
@@ -59,6 +59,7 @@ export const useTherapistProfile = () => {
         throw error;
       }
 
+      console.log('Therapist profile saved successfully:', result);
       return result;
     },
   });

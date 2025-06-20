@@ -38,20 +38,25 @@ const Login = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       await login(data.email, data.password);
+      
       toast({
         title: 'Login realizado com sucesso!',
         description: 'Bem-vindo de volta.',
       });
-      navigate(from, { replace: true });
+      
+      // O AuthContext já fará o redirecionamento via window.location.href
     } catch (error) {
       console.error('Login error:', error);
       let errorMessage = 'Erro desconhecido';
       
       if (error instanceof Error) {
-        if (error.message.includes('Invalid login credentials')) {
+        if (error.message.includes('Invalid login credentials') || 
+            error.message.includes('invalid_credentials')) {
           errorMessage = 'E-mail ou senha incorretos';
         } else if (error.message.includes('Email not confirmed')) {
           errorMessage = 'Por favor, confirme seu e-mail antes de fazer login';
+        } else if (error.message.includes('too_many_requests')) {
+          errorMessage = 'Muitas tentativas de login. Tente novamente em alguns minutos.';
         } else {
           errorMessage = error.message;
         }

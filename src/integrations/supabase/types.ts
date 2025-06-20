@@ -49,6 +49,7 @@ export type Database = {
           especialidades: string[] | null
           estado: string | null
           experience: number | null
+          formacao: Json | null
           foto_url: string | null
           id: string
           is_online: boolean | null
@@ -71,6 +72,7 @@ export type Database = {
           especialidades?: string[] | null
           estado?: string | null
           experience?: number | null
+          formacao?: Json | null
           foto_url?: string | null
           id?: string
           is_online?: boolean | null
@@ -93,6 +95,7 @@ export type Database = {
           especialidades?: string[] | null
           estado?: string | null
           experience?: number | null
+          formacao?: Json | null
           foto_url?: string | null
           id?: string
           is_online?: boolean | null

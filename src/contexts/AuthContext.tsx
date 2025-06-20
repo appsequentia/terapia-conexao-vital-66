@@ -39,6 +39,25 @@ export const useAuth = () => {
   return context;
 };
 
+// Função para limpar estado de auth
+const cleanupAuthState = () => {
+  // Limpar chaves do localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  
+  // Limpar chaves do sessionStorage se existir
+  if (typeof sessionStorage !== 'undefined') {
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -48,6 +67,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Função para buscar o perfil do usuário
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('Fetching user profile for:', userId);
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
@@ -58,6 +79,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Error fetching profile:', error);
         return;
       }
+
+      console.log('Profile fetched:', data);
 
       // Fazer type assertion para garantir o tipo correto
       const profileData: UserProfile = {
@@ -94,11 +117,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Verificar sessão existente
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session);
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchUserProfile(session.user.id);
+        setTimeout(() => {
+          fetchUserProfile(session.user.id);
+        }, 0);
       }
       
       setIsLoading(false);
@@ -110,6 +136,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
+      // Limpar estado antes do login
+      cleanupAuthState();
+      
+      // Tentar logout global primeiro
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue mesmo se falhar
+        console.warn('Global signout failed:', err);
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -117,19 +154,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) throw error;
 
-      // A sessão será atualizada automaticamente pelo listener
       console.log('Login successful:', data);
+      
+      // Forçar refresh da página para garantir estado limpo
+      if (data.user) {
+        window.location.href = '/';
+      }
     } catch (error) {
       console.error('Login error:', error);
-      throw new Error(error instanceof Error ? error.message : 'Erro no login');
-    } finally {
       setIsLoading(false);
+      throw new Error(error instanceof Error ? error.message : 'Erro no login');
     }
   };
 
   const register = async (data: RegisterData) => {
     setIsLoading(true);
     try {
+      // Limpar estado antes do registro
+      cleanupAuthState();
+      
       const redirectUrl = `${window.location.origin}/`;
       
       const { data: authData, error } = await supabase.auth.signUp({
@@ -148,31 +191,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('Registration successful:', authData);
       
-      // Se não precisar confirmar email, o perfil será criado automaticamente
-      // Se precisar confirmar, será criado após confirmação
+      // Aguardar um pouco para que o trigger crie o perfil
+      if (authData.user && !authData.session) {
+        // Usuário precisa confirmar email
+        console.log('User needs to confirm email');
+      } else if (authData.user && authData.session) {
+        // Login automático - aguardar criação do perfil
+        console.log('Auto-login successful, waiting for profile creation');
+        
+        // Aguardar alguns segundos para o trigger criar o perfil
+        setTimeout(() => {
+          if (data.type === 'therapist') {
+            window.location.href = '/perfil-terapeuta';
+          } else {
+            window.location.href = '/';
+          }
+        }, 2000);
+      }
     } catch (error) {
       console.error('Registration error:', error);
-      throw new Error(error instanceof Error ? error.message : 'Erro ao criar conta');
-    } finally {
       setIsLoading(false);
+      throw new Error(error instanceof Error ? error.message : 'Erro ao criar conta');
     }
   };
 
   const logout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      console.log('Logging out...');
+      
+      // Limpar estado primeiro
+      cleanupAuthState();
+      
+      // Tentar logout global
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.warn('Global signout failed:', err);
+      }
       
       // Limpar estado local
       setUser(null);
       setProfile(null);
       setSession(null);
       
-      // Redirecionar para home
+      // Forçar refresh da página
       window.location.href = '/';
     } catch (error) {
       console.error('Logout error:', error);
-      // Mesmo se der erro, limpar estado local
+      // Mesmo se der erro, limpar estado local e redirecionar
       setUser(null);
       setProfile(null);
       setSession(null);
