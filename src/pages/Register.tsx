@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -61,11 +60,17 @@ const Register = () => {
       
       toast({
         title: 'Conta criada com sucesso!',
-        description: 'Verifique seu e-mail para confirmar sua conta.',
+        description: data.type === 'therapist' 
+          ? 'Agora vamos configurar seu perfil profissional.'
+          : 'Verifique seu e-mail para confirmar sua conta.',
       });
       
-      // Redirecionar para login
-      navigate('/login');
+      // Redirecionamento condicional
+      if (data.type === 'therapist') {
+        navigate('/perfil-terapeuta');
+      } else {
+        navigate('/login');
+      }
     } catch (error) {
       console.error('Registration error:', error);
       let errorMessage = 'Erro desconhecido';

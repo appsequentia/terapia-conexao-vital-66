@@ -12,6 +12,7 @@ import HowItWorks from "./pages/HowItWorks";
 import ParaTerapeutas from "./pages/ParaTerapeutas";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import TherapistProfile from "./pages/TherapistProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,14 @@ const App = () => (
                   <Register />
                 </ProtectedRoute>
               } 
+            />
+            <Route 
+              path="/perfil-terapeuta" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <TherapistProfile />
+                </ProtectedRoute>
+              }
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
