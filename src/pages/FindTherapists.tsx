@@ -6,7 +6,7 @@ import TherapistCard from '@/components/TherapistCard';
 import FilterSidebar from '@/components/FilterSidebar';
 import SortSelect from '@/components/SortSelect';
 import ViewToggle from '@/components/ViewToggle';
-import { mockTherapists } from '@/utils/mockData';
+import { useTherapists } from '@/hooks/useTherapists';
 import { TherapistProfile, SearchFilters } from '@/types/therapist';
 import { Button } from '@/components/ui/button';
 import { Filter, X } from 'lucide-react';
@@ -22,8 +22,8 @@ import {
 const THERAPISTS_PER_PAGE = 6;
 
 const FindTherapists = () => {
-  const [therapists] = useState<TherapistProfile[]>(mockTherapists);
-  const [filteredTherapists, setFilteredTherapists] = useState<TherapistProfile[]>(mockTherapists);
+  const { data: therapists = [], isLoading, error } = useTherapists();
+  const [filteredTherapists, setFilteredTherapists] = useState<TherapistProfile[]>([]);
   const [filters, setFilters] = useState<SearchFilters>({
     specialties: [],
     approaches: [],
@@ -39,6 +39,13 @@ const FindTherapists = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [currentPage, setCurrentPage] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  // Use therapists data once loaded and apply initial filtering
+  React.useEffect(() => {
+    if (therapists.length > 0) {
+      applyFilters(filters, searchQuery, location);
+    }
+  }, [therapists]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredTherapists.length / THERAPISTS_PER_PAGE);
@@ -158,6 +165,24 @@ const FindTherapists = () => {
     setCurrentPage(1);
   };
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="text-center py-12">
+            <p className="text-red-600 text-lg mb-4">
+              Erro ao carregar terapeutas. Tente novamente mais tarde.
+            </p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Tentar Novamente
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -170,7 +195,7 @@ const FindTherapists = () => {
               Encontrar Terapeutas
             </h1>
             <p className="text-gray-600">
-              {filteredTherapists.length} profissionais encontrados
+              {isLoading ? 'Carregando...' : `${filteredTherapists.length} profissionais encontrados`}
             </p>
           </div>
           <SearchBar onSearch={handleSearch} />
@@ -210,7 +235,13 @@ const FindTherapists = () => {
             </div>
 
             {/* Results */}
-            {currentTherapists.length === 0 ? (
+            {isLoading ? (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">
+                  Carregando terapeutas...
+                </p>
+              </div>
+            ) : currentTherapists.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-500 text-lg mb-4">
                   Nenhum terapeuta encontrado com os filtros aplicados.

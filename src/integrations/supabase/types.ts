@@ -9,7 +9,72 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      terapeutas: {
+        Row: {
+          abordagens: string[] | null
+          bio: string | null
+          cidade: string | null
+          created_at: string | null
+          email: string
+          especialidades: string[] | null
+          estado: string | null
+          experience: number | null
+          foto_url: string | null
+          id: string
+          is_online: boolean | null
+          languages: string[] | null
+          nome: string
+          offers_in_person: boolean | null
+          offers_online: boolean | null
+          price_per_session: number | null
+          rating: number | null
+          review_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          abordagens?: string[] | null
+          bio?: string | null
+          cidade?: string | null
+          created_at?: string | null
+          email: string
+          especialidades?: string[] | null
+          estado?: string | null
+          experience?: number | null
+          foto_url?: string | null
+          id?: string
+          is_online?: boolean | null
+          languages?: string[] | null
+          nome: string
+          offers_in_person?: boolean | null
+          offers_online?: boolean | null
+          price_per_session?: number | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          abordagens?: string[] | null
+          bio?: string | null
+          cidade?: string | null
+          created_at?: string | null
+          email?: string
+          especialidades?: string[] | null
+          estado?: string | null
+          experience?: number | null
+          foto_url?: string | null
+          id?: string
+          is_online?: boolean | null
+          languages?: string[] | null
+          nome?: string
+          offers_in_person?: boolean | null
+          offers_online?: boolean | null
+          price_per_session?: number | null
+          rating?: number | null
+          review_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

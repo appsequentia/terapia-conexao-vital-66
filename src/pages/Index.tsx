@@ -1,14 +1,19 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import TherapistCard from '@/components/TherapistCard';
-import { mockTherapists } from '@/utils/mockData';
+import { useTherapists } from '@/hooks/useTherapists';
 import { Button } from '@/components/ui/button';
 import { Heart, Shield, Clock, Star } from 'lucide-react';
 
 const Index = () => {
-  const [therapists] = useState(mockTherapists);
+  const { data: therapists = [], isLoading, error } = useTherapists();
+
+  if (error) {
+    console.error('Error loading therapists:', error);
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -93,11 +98,21 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid gap-6 mb-8">
-            {therapists.map((therapist) => (
-              <TherapistCard key={therapist.id} therapist={therapist} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600">Carregando terapeutas...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-600">Erro ao carregar terapeutas. Tente novamente mais tarde.</p>
+            </div>
+          ) : (
+            <div className="grid gap-6 mb-8">
+              {therapists.slice(0, 3).map((therapist) => (
+                <TherapistCard key={therapist.id} therapist={therapist} />
+              ))}
+            </div>
+          )}
 
           <div className="text-center">
             <Link to="/encontrar-terapeutas">
