@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -211,7 +210,7 @@ const TherapistProfile = () => {
                 <Controller
                   name="abordagem"
                   control={control}
-                  render={({ fiel }) => (
+                  render={({ field }) => (
                     <Select onValueChange={(value) => setValue('abordagem', value)}>
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Selecione sua abordagem principal" />
