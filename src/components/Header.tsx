@@ -18,12 +18,25 @@ const Header = () => {
   const { isAuthenticated, profile, logout, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  console.log('Header - isAuthenticated:', isAuthenticated, 'isLoading:', isLoading, 'profile:', !!profile);
+
   const handleLogout = async () => {
     try {
+      console.log('Header - Logging out...');
       await logout();
     } catch (error) {
-      console.error('Erro ao fazer logout:', error);
+      console.error('Header - Erro ao fazer logout:', error);
     }
+  };
+
+  const handleLogin = () => {
+    console.log('Header - Navigating to login');
+    navigate('/login');
+  };
+
+  const handleRegister = () => {
+    console.log('Header - Navigating to register');
+    navigate('/cadastro');
   };
 
   const getUserInitials = (nome: string) => {
@@ -119,13 +132,13 @@ const Header = () => {
               <div className="flex items-center space-x-4">
                 <Button
                   variant="ghost"
-                  onClick={() => navigate('/login')}
+                  onClick={handleLogin}
                   className="text-gray-700 hover:text-primary"
                 >
                   Entrar
                 </Button>
                 <Button
-                  onClick={() => navigate('/cadastro')}
+                  onClick={handleRegister}
                   className="bg-primary hover:bg-primary/90"
                 >
                   Cadastrar

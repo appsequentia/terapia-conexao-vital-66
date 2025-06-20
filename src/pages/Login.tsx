@@ -25,6 +25,8 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  console.log('Login page loaded');
+
   const from = location.state?.from?.pathname || '/';
 
   const {
@@ -36,6 +38,8 @@ const Login = () => {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    console.log('Login form submitted:', data.email);
+    
     try {
       await login(data.email, data.password);
       
@@ -44,9 +48,10 @@ const Login = () => {
         description: 'Bem-vindo de volta.',
       });
       
+      console.log('Login successful, redirecting...');
       // O AuthContext já fará o redirecionamento via window.location.href
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Login error in form:', error);
       let errorMessage = 'Erro desconhecido';
       
       if (error instanceof Error) {
@@ -69,6 +74,8 @@ const Login = () => {
       });
     }
   };
+
+  console.log('Rendering login form, isLoading:', isLoading);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
