@@ -58,15 +58,31 @@ const Register = () => {
         password: data.password,
         type: data.type,
       });
+      
       toast({
         title: 'Conta criada com sucesso!',
-        description: 'Bem-vindo à Sequentia.',
+        description: 'Verifique seu e-mail para confirmar sua conta.',
       });
-      navigate('/');
+      
+      // Redirecionar para login
+      navigate('/login');
     } catch (error) {
+      console.error('Registration error:', error);
+      let errorMessage = 'Erro desconhecido';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('User already registered')) {
+          errorMessage = 'Este e-mail já está cadastrado';
+        } else if (error.message.includes('Password should be at least 6 characters')) {
+          errorMessage = 'A senha deve ter pelo menos 6 caracteres';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: 'Erro no cadastro',
-        description: error instanceof Error ? error.message : 'Erro desconhecido',
+        description: errorMessage,
         variant: 'destructive',
       });
     }

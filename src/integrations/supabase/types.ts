@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          id: string
+          nome: string
+          tipo_usuario: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          id: string
+          nome: string
+          tipo_usuario: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          nome?: string
+          tipo_usuario?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       terapeutas: {
         Row: {
           abordagens: string[] | null
@@ -30,6 +60,7 @@ export type Database = {
           rating: number | null
           review_count: number | null
           updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           abordagens?: string[] | null
@@ -51,6 +82,7 @@ export type Database = {
           rating?: number | null
           review_count?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           abordagens?: string[] | null
@@ -72,6 +104,7 @@ export type Database = {
           rating?: number | null
           review_count?: number | null
           updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

@@ -1,146 +1,163 @@
 
-import { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, User, LogOut } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/contexts/AuthContext';
+import { User, LogOut, Settings } from 'lucide-react';
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, profile, logout, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    }
+  };
+
+  const getUserInitials = (nome: string) => {
+    return nome
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
-    <header className="bg-white shadow-sm border-b sticky top-0 z-50">
+    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <span className="text-2xl font-bold text-primary">Sequentia</span>
-          </Link>
+          <div className="flex-shrink-0">
+            <Link 
+              to="/" 
+              className="text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
+            >
+              Sequentia
+            </Link>
+          </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/encontrar-terapeutas" className="text-gray-700 hover:text-primary transition-colors">
+          {/* Navigation */}
+          <nav className="hidden md:flex space-x-8">
+            <Link
+              to="/encontrar-terapeutas"
+              className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+            >
               Encontrar Terapeutas
             </Link>
-            <Link to="/como-funciona" className="text-gray-700 hover:text-primary transition-colors">
+            <Link
+              to="/como-funciona"
+              className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+            >
               Como Funciona
             </Link>
-            <Link to="/para-terapeutas" className="text-gray-700 hover:text-primary transition-colors">
+            <Link
+              to="/para-terapeutas"
+              className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium transition-colors"
+            >
               Para Terapeutas
             </Link>
           </nav>
 
-          {/* Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
-            {isAuthenticated ? (
+          {/* Auth Section */}
+          <div className="flex items-center space-x-4">
+            {isLoading ? (
+              <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+            ) : isAuthenticated && profile ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2">
-                    <User className="h-4 w-4" />
-                    <span>{user?.name}</span>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={profile.avatar_url} alt={profile.nome} />
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {getUserInitials(profile.nome)}
+                      </AvatarFallback>
+                    </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{profile.nome}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {profile.email}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground capitalize">
+                        {profile.tipo_usuario === 'client' ? 'Cliente' : 'Terapeuta'}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/perfil')}>
-                    <User className="h-4 w-4 mr-2" />
-                    Meu Perfil
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Meu Perfil</span>
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/configuracoes')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Configurações</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sair
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Sair</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <>
-                <Link to="/login">
-                  <Button variant="ghost">Entrar</Button>
-                </Link>
-                <Link to="/cadastro">
-                  <Button>Cadastrar</Button>
-                </Link>
-              </>
+              <div className="flex items-center space-x-4">
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/login')}
+                  className="text-gray-700 hover:text-primary"
+                >
+                  Entrar
+                </Button>
+                <Button
+                  onClick={() => navigate('/cadastro')}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  Cadastrar
+                </Button>
+              </div>
             )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            <div className="flex flex-col space-y-4">
-              <Link
-                to="/encontrar-terapeutas"
-                className="text-gray-700 hover:text-primary transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Encontrar Terapeutas
-              </Link>
-              <Link
-                to="/como-funciona"
-                className="text-gray-700 hover:text-primary transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Como Funciona
-              </Link>
-              <Link
-                to="/para-terapeutas"
-                className="text-gray-700 hover:text-primary transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Para Terapeutas
-              </Link>
-              
-              {isAuthenticated ? (
-                <div className="flex flex-col space-y-2 pt-4 border-t">
-                  <span className="text-sm text-gray-600">Olá, {user?.name}</span>
-                  <Button variant="ghost" onClick={() => navigate('/perfil')} className="justify-start">
-                    <User className="h-4 w-4 mr-2" />
-                    Meu Perfil
-                  </Button>
-                  <Button variant="ghost" onClick={handleLogout} className="justify-start">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sair
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col space-y-2 pt-4 border-t">
-                  <Link to="/login" onClick={() => setIsMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start">
-                      Entrar
-                    </Button>
-                  </Link>
-                  <Link to="/cadastro" onClick={() => setIsMenuOpen(false)}>
-                    <Button className="w-full">Cadastrar</Button>
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        <div className="md:hidden">
+          <nav className="flex space-x-4 py-2">
+            <Link
+              to="/encontrar-terapeutas"
+              className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium"
+            >
+              Terapeutas
+            </Link>
+            <Link
+              to="/como-funciona"
+              className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium"
+            >
+              Como Funciona
+            </Link>
+            <Link
+              to="/para-terapeutas"
+              className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium"
+            >
+              Para Terapeutas
+            </Link>
+          </nav>
+        </div>
       </div>
     </header>
   );

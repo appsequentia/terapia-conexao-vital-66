@@ -1,16 +1,20 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
-interface User {
+interface UserProfile {
   id: string;
-  name: string;
+  nome: string;
   email: string;
-  type: 'client' | 'therapist';
-  avatar?: string;
+  tipo_usuario: 'client' | 'therapist';
+  avatar_url?: string;
 }
 
 interface AuthContextType {
   user: User | null;
+  profile: UserProfile | null;
+  session: Session | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
@@ -37,35 +41,81 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Verificar se há um usuário logado no localStorage
-    const storedUser = localStorage.getItem('auth_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+  // Função para buscar o perfil do usuário
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
+
+      setProfile(data);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
     }
-    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    // Configurar listener para mudanças de autenticação
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session);
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          // Buscar perfil do usuário com delay para evitar deadlock
+          setTimeout(() => {
+            fetchUserProfile(session.user.id);
+          }, 0);
+        } else {
+          setProfile(null);
+        }
+
+        setIsLoading(false);
+      }
+    );
+
+    // Verificar sessão existente
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      }
+      
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Simulação de API - substituir por integração real
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock user data
-      const mockUser: User = {
-        id: '1',
-        name: 'Usuário Teste',
-        email: email,
-        type: email.includes('terapeuta') ? 'therapist' : 'client',
-      };
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      setUser(mockUser);
-      localStorage.setItem('auth_user', JSON.stringify(mockUser));
+      if (error) throw error;
+
+      // A sessão será atualizada automaticamente pelo listener
+      console.log('Login successful:', data);
     } catch (error) {
-      throw new Error('Credenciais inválidas');
+      console.error('Login error:', error);
+      throw new Error(error instanceof Error ? error.message : 'Erro no login');
     } finally {
       setIsLoading(false);
     }
@@ -74,34 +124,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (data: RegisterData) => {
     setIsLoading(true);
     try {
-      // Simulação de API - substituir por integração real
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const redirectUrl = `${window.location.origin}/`;
       
-      const newUser: User = {
-        id: Date.now().toString(),
-        name: data.name,
+      const { data: authData, error } = await supabase.auth.signUp({
         email: data.email,
-        type: data.type,
-      };
+        password: data.password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            name: data.name,
+            type: data.type,
+          }
+        }
+      });
 
-      setUser(newUser);
-      localStorage.setItem('auth_user', JSON.stringify(newUser));
+      if (error) throw error;
+
+      console.log('Registration successful:', authData);
+      
+      // Se não precisar confirmar email, o perfil será criado automaticamente
+      // Se precisar confirmar, será criado após confirmação
     } catch (error) {
-      throw new Error('Erro ao criar conta');
+      console.error('Registration error:', error);
+      throw new Error(error instanceof Error ? error.message : 'Erro ao criar conta');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('auth_user');
+  const logout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      // Limpar estado local
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      
+      // Redirecionar para home
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Mesmo se der erro, limpar estado local
+      setUser(null);
+      setProfile(null);
+      setSession(null);
+      window.location.href = '/';
+    }
   };
 
-  const isAuthenticated = !!user;
+  const isAuthenticated = !!user && !!session;
 
   const value = {
     user,
+    profile,
+    session,
     isLoading,
     login,
     register,

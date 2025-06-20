@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -23,6 +23,9 @@ const Login = () => {
   const { login, isLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || '/';
 
   const {
     register,
@@ -39,11 +42,24 @@ const Login = () => {
         title: 'Login realizado com sucesso!',
         description: 'Bem-vindo de volta.',
       });
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (error) {
+      console.error('Login error:', error);
+      let errorMessage = 'Erro desconhecido';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('Invalid login credentials')) {
+          errorMessage = 'E-mail ou senha incorretos';
+        } else if (error.message.includes('Email not confirmed')) {
+          errorMessage = 'Por favor, confirme seu e-mail antes de fazer login';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: 'Erro no login',
-        description: error instanceof Error ? error.message : 'Erro desconhecido',
+        description: errorMessage,
         variant: 'destructive',
       });
     }
