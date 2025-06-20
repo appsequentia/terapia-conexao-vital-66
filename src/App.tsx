@@ -12,6 +12,9 @@ import HowItWorks from "./pages/HowItWorks";
 import ParaTerapeutas from "./pages/ParaTerapeutas";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ClientDashboard from "./pages/ClientDashboard";
+import TherapistDashboard from "./pages/TherapistDashboard";
 import TherapistProfile from "./pages/TherapistProfile";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +47,30 @@ const App = () => (
                   <Register />
                 </ProtectedRoute>
               } 
+            />
+            <Route 
+              path="/esqueci-senha" 
+              element={
+                <ProtectedRoute requireAuth={false}>
+                  <ForgotPassword />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/dashboard-cliente" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <ClientDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/dashboard-terapeuta" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <TherapistDashboard />
+                </ProtectedRoute>
+              }
             />
             <Route 
               path="/perfil-terapeuta" 

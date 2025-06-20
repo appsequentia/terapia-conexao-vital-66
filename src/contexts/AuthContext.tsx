@@ -61,6 +61,54 @@ const cleanupAuthState = () => {
   }
 };
 
+// Função para verificar se terapeuta tem perfil completo
+const checkTherapistProfile = async (userId: string): Promise<boolean> => {
+  try {
+    console.log('Checking therapist profile for user:', userId);
+    
+    const { data, error } = await supabase
+      .from('terapeutas')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error checking therapist profile:', error);
+      return false;
+    }
+
+    const hasProfile = !!data;
+    console.log('Therapist profile check result:', hasProfile);
+    return hasProfile;
+  } catch (error) {
+    console.error('Error in checkTherapistProfile:', error);
+    return false;
+  }
+};
+
+// Função para redirecionar usuário após login
+const redirectUserAfterLogin = async (profile: UserProfile) => {
+  console.log('Redirecting user after login:', profile.tipo_usuario);
+  
+  if (profile.tipo_usuario === 'client') {
+    console.log('Redirecting client to dashboard');
+    window.location.href = '/dashboard-cliente';
+  } else if (profile.tipo_usuario === 'therapist') {
+    const hasProfile = await checkTherapistProfile(profile.id);
+    
+    if (hasProfile) {
+      console.log('Therapist has profile, redirecting to dashboard');
+      window.location.href = '/dashboard-terapeuta';
+    } else {
+      console.log('Therapist needs to complete profile, redirecting to profile form');
+      window.location.href = '/perfil-terapeuta';
+    }
+  } else {
+    console.log('Unknown user type, redirecting to home');
+    window.location.href = '/';
+  }
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -183,11 +231,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       console.log('Login successful:', !!data.user);
       
-      // Aguardar um pouco antes de redirecionar
+      // Aguardar perfil do usuário e redirecionar
       if (data.user) {
-        setTimeout(() => {
-          window.location.href = '/';
-        }, 500);
+        // Buscar perfil para redirecionamento
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching profile for redirect:', profileError);
+          // Se não conseguir buscar perfil, redirecionar para home
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 500);
+        } else {
+          const profile: UserProfile = {
+            ...profileData,
+            tipo_usuario: profileData.tipo_usuario as 'client' | 'therapist'
+          };
+          
+          // Redirecionar baseado no tipo de usuário
+          setTimeout(() => {
+            redirectUserAfterLogin(profile);
+          }, 500);
+        }
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -239,7 +308,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (data.type === 'therapist') {
             window.location.href = '/perfil-terapeuta';
           } else {
-            window.location.href = '/';
+            window.location.href = '/dashboard-cliente';
           }
         }, 2000);
       }
