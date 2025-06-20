@@ -59,7 +59,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      setProfile(data);
+      // Fazer type assertion para garantir o tipo correto
+      const profileData: UserProfile = {
+        ...data,
+        tipo_usuario: data.tipo_usuario as 'client' | 'therapist'
+      };
+
+      setProfile(profileData);
     } catch (error) {
       console.error('Error fetching user profile:', error);
     }

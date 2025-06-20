@@ -2,16 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-
-export interface UserProfile {
-  id: string;
-  nome: string;
-  email: string;
-  tipo_usuario: 'client' | 'therapist';
-  avatar_url?: string;
-  created_at: string;
-  updated_at: string;
-}
+import { UserProfile } from '@/types/profile';
 
 export const useUserProfile = () => {
   const { user } = useAuth();
@@ -34,7 +25,13 @@ export const useUserProfile = () => {
         throw error;
       }
 
-      return data;
+      // Fazer type assertion para garantir o tipo correto
+      const profileData: UserProfile = {
+        ...data,
+        tipo_usuario: data.tipo_usuario as 'client' | 'therapist'
+      };
+
+      return profileData;
     },
     enabled: !!user?.id,
   });
