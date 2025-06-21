@@ -4,12 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TherapistProfile } from '@/types/therapist';
+import { useNavigate } from 'react-router-dom';
 
 interface TherapistCardProps {
   therapist: TherapistProfile;
 }
 
 const TherapistCard = ({ therapist }: TherapistCardProps) => {
+  const navigate = useNavigate();
+
+  const handleViewProfile = () => {
+    navigate(`/terapeuta/${therapist.id}`);
+  };
+
   return (
     <div className="therapist-card p-6">
       <div className="flex flex-col sm:flex-row gap-4">
@@ -92,7 +99,7 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
               <Calendar className="h-4 w-4 mr-2" />
               Agendar Consulta
             </Button>
-            <Button variant="outline" className="flex-1 sm:flex-initial">
+            <Button variant="outline" className="flex-1 sm:flex-initial" onClick={handleViewProfile}>
               Ver Perfil
             </Button>
           </div>
