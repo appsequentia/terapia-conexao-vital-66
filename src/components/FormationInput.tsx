@@ -15,9 +15,14 @@ export interface Formation {
 interface FormationInputProps {
   formations: Formation[];
   onChange: (formations: Formation[]) => void;
+  isRequired?: boolean;
 }
 
-const FormationInput: React.FC<FormationInputProps> = ({ formations, onChange }) => {
+const FormationInput: React.FC<FormationInputProps> = ({ 
+  formations, 
+  onChange, 
+  isRequired = true 
+}) => {
   const addFormation = () => {
     const newFormation: Formation = {
       id: Date.now().toString(),
@@ -40,7 +45,9 @@ const FormationInput: React.FC<FormationInputProps> = ({ formations, onChange })
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <Label className="text-base font-medium">Formação Acadêmica</Label>
+        <Label className="text-base font-medium">
+          Formação Acadêmica {!isRequired && '(opcional)'}
+        </Label>
         <Button
           type="button"
           variant="outline"
@@ -55,7 +62,10 @@ const FormationInput: React.FC<FormationInputProps> = ({ formations, onChange })
 
       {formations.length === 0 && (
         <p className="text-sm text-gray-500 italic">
-          Nenhuma formação adicionada. Clique em "Adicionar" para incluir sua formação acadêmica.
+          {isRequired 
+            ? 'Nenhuma formação adicionada. Clique em "Adicionar" para incluir sua formação acadêmica.'
+            : 'Formação principal (ex: Psicologia, Terapia Sistêmica...). Clique em "Adicionar" para incluir sua formação acadêmica.'
+          }
         </p>
       )}
 
@@ -85,7 +95,7 @@ const FormationInput: React.FC<FormationInputProps> = ({ formations, onChange })
                     id={`institution-${formation.id}`}
                     value={formation.institution}
                     onChange={(e) => updateFormation(formation.id, 'institution', e.target.value)}
-                    placeholder="Ex: Universidade de São Paulo"
+                    placeholder="Ex: Universidade de São Paulo, PUC-SP"
                     className="mt-1"
                   />
                 </div>

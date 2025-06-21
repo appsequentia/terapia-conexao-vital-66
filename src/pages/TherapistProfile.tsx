@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -71,9 +70,9 @@ const therapistProfileSchema = z.object({
     id: z.string(),
     institution: z.string().min(1, 'Informe a instituição'),
     year: z.string().min(4, 'Informe o ano de conclusão')
-  })).min(1, 'Adicione pelo menos uma formação acadêmica'),
+  })),
   photoUrl: z.string().optional(),
-  consultorioNome: z.string().optional(),
+  hasProfessionalRegistry: z.boolean(),
   crpNumero: z.string().optional()
 }).refine(data => data.offersOnline || data.offersInPerson, {
   message: 'Selecione pelo menos uma modalidade de atendimento',
@@ -112,7 +111,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
       experience: 0,
       offersOnline: false,
       offersInPerson: false,
-      consultorioNome: '',
+      hasProfessionalRegistry: false,
       crpNumero: '',
     },
   });
@@ -120,6 +119,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
   const watchPrice = watch('pricePerSession');
   const watchOffersOnline = watch('offersOnline');
   const watchOffersInPerson = watch('offersInPerson');
+  const watchHasProfessionalRegistry = watch('hasProfessionalRegistry');
 
   // Helper function to safely parse formacao from Supabase
   const parseFormacao = (formacao: any): Formation[] => {
@@ -156,7 +156,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
         offersInPerson: existingData.offers_in_person || false,
         formations: parsedFormacao,
         photoUrl: existingData.foto_url || '',
-        consultorioNome: existingData.consultorio_nome || '',
+        hasProfessionalRegistry: existingData.has_professional_registry || false,
         crpNumero: existingData.crp_numero || ''
       });
 
@@ -222,8 +222,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
           institution: f.institution,
           year: f.year
         })),
-        consultorio_nome: data.consultorioNome,
-        crp_numero: data.crpNumero
+        crp_numero: data.hasProfessionalRegistry ? data.crpNumero : undefined
       });
 
       toast({
@@ -277,7 +276,10 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
 
         <Card>
           <CardHeader>
-            <CardTitle>Dados Profissionais</CardTitle>
+            <CardTitle>Informações Profissionais</CardTitle>
+            <p className="text-sm text-gray-600">
+              Preencha os dados principais que serão exibidos no seu perfil público.
+            </p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -293,26 +295,31 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
                 </div>
               </div>
 
-              {/* Nome do consultório (novo campo) */}
-              <div>
-                <Label htmlFor="consultorioNome">Nome do Consultório (opcional)</Label>
-                <Input
-                  id="consultorioNome"
-                  placeholder="Ex: Clínica Bem-Estar"
-                  className="mt-1"
-                  {...register('consultorioNome')}
-                />
-              </div>
+              {/* Checkbox para registro profissional */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="hasProfessionalRegistry"
+                    checked={watchHasProfessionalRegistry}
+                    onCheckedChange={(checked) => setValue('hasProfessionalRegistry', !!checked)}
+                  />
+                  <Label htmlFor="hasProfessionalRegistry" className="font-normal">
+                    Possuo registro profissional (CRP, CRT, etc.)
+                  </Label>
+                </div>
 
-              {/* CRP/Registro profissional (novo campo) */}
-              <div>
-                <Label htmlFor="crpNumero">CRP ou Registro Profissional (opcional)</Label>
-                <Input
-                  id="crpNumero"
-                  placeholder="Ex: CRP 12/34567"
-                  className="mt-1"
-                  {...register('crpNumero')}
-                />
+                {/* Campo CRP condicional */}
+                {watchHasProfessionalRegistry && (
+                  <div className="ml-6">
+                    <Label htmlFor="crpNumero">Número do Registro Profissional</Label>
+                    <Input
+                      id="crpNumero"
+                      placeholder="Ex: CRP 12/34567, CRT 123456"
+                      className="mt-1"
+                      {...register('crpNumero')}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Abordagem terapêutica */}
@@ -509,13 +516,14 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
                 )}
               </div>
 
-              {/* Formação acadêmica */}
+              {/* Formação acadêmica - agora opcional */}
               <FormationInput
                 formations={formations}
                 onChange={(newFormations) => {
                   setFormations(newFormations);
                   setValue('formations', newFormations);
                 }}
+                isRequired={false}
               />
               {errors.formations && (
                 <p className="mt-1 text-sm text-red-600">{errors.formations.message}</p>
