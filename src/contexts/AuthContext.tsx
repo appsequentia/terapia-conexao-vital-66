@@ -8,6 +8,7 @@ interface UserProfile {
   nome: string;
   email: string;
   tipo_usuario: 'client' | 'therapist';
+  genero?: 'masculino' | 'feminino' | 'neutro' | 'nao_informado';
   avatar_url?: string;
 }
 
@@ -136,7 +137,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       const profileData: UserProfile = {
         ...data,
-        tipo_usuario: data.tipo_usuario as 'client' | 'therapist'
+        tipo_usuario: data.tipo_usuario as 'client' | 'therapist',
+        genero: data.genero as 'masculino' | 'feminino' | 'neutro' | 'nao_informado' | undefined
       };
 
       setProfile(profileData);

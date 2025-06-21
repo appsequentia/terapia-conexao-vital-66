@@ -28,7 +28,8 @@ export const useUserProfile = () => {
       // Fazer type assertion para garantir o tipo correto
       const profileData: UserProfile = {
         ...data,
-        tipo_usuario: data.tipo_usuario as 'client' | 'therapist'
+        tipo_usuario: data.tipo_usuario as 'client' | 'therapist',
+        genero: data.genero as 'masculino' | 'feminino' | 'neutro' | 'nao_informado' | undefined
       };
 
       return profileData;
