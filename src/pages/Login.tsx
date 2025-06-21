@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { useEffect } from 'react';
 
 const loginSchema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -21,12 +22,34 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, isLoading } = useAuth();
+  const { login, isLoading, isAuthenticated, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log('Login page loaded');
+  console.log('Login page loaded - isAuthenticated:', isAuthenticated, 'isLoading:', isLoading);
+
+  // Redirecionar usuários autenticados se necessário
+  useEffect(() => {
+    if (isAuthenticated && profile && !isLoading) {
+      console.log('User is already authenticated, showing message');
+      toast({
+        title: 'Você já está logado',
+        description: 'Redirecionando para o dashboard...',
+      });
+      
+      // Redirecionar baseado no tipo de usuário
+      setTimeout(() => {
+        if (profile.tipo_usuario === 'client') {
+          navigate('/dashboard-cliente');
+        } else if (profile.tipo_usuario === 'therapist') {
+          navigate('/dashboard-terapeuta');
+        } else {
+          navigate('/');
+        }
+      }, 1000);
+    }
+  }, [isAuthenticated, profile, isLoading, navigate, toast]);
 
   const from = location.state?.from?.pathname || '/';
 
@@ -46,11 +69,11 @@ const Login = () => {
       
       toast({
         title: 'Login realizado com sucesso!',
-        description: 'Bem-vindo de volta.',
+        description: 'Bem-vindo de volta. Redirecionando...',
       });
       
-      console.log('Login successful, redirecting...');
-      // O AuthContext já fará o redirecionamento via window.location.href
+      console.log('Login successful, AuthContext will handle redirection');
+      
     } catch (error) {
       console.error('Login error in form:', error);
       let errorMessage = 'Erro desconhecido';

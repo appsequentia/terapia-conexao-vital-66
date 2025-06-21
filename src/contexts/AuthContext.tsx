@@ -84,14 +84,15 @@ const checkTherapistProfile = async (userId: string): Promise<boolean> => {
   }
 };
 
-// Função para redirecionar usuário após login
-const redirectUserAfterLogin = async (profile: UserProfile) => {
-  console.log('Redirecting user after login:', profile.tipo_usuario);
+// Função para redirecionar usuário após carregamento do perfil
+const handleUserRedirect = async (profile: UserProfile) => {
+  console.log('Handling user redirect for:', profile.tipo_usuario, profile.email);
   
   if (profile.tipo_usuario === 'client') {
     console.log('Redirecting client to dashboard');
     window.location.href = '/dashboard-cliente';
   } else if (profile.tipo_usuario === 'therapist') {
+    console.log('Checking therapist profile completion...');
     const hasProfile = await checkTherapistProfile(profile.id);
     
     if (hasProfile) {
@@ -128,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching profile:', error);
-        return;
+        return null;
       }
 
       console.log('Profile fetched:', data);
@@ -139,8 +140,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
 
       setProfile(profileData);
+      return profileData;
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      return null;
     }
   };
 
@@ -156,17 +159,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Configurar listener para mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
+        console.log('Auth state changed:', event, session?.user?.email);
         clearTimeout(loadingTimeout);
         
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          setTimeout(() => {
-            fetchUserProfile(session.user.id);
+          console.log('User authenticated, fetching profile...');
+          // Buscar perfil do usuário
+          setTimeout(async () => {
+            const profileData = await fetchUserProfile(session.user.id);
+            
+            // Se o perfil foi carregado e estamos na página inicial, redirecionar
+            if (profileData && window.location.pathname === '/') {
+              console.log('Profile loaded, checking if should redirect...');
+              await handleUserRedirect(profileData);
+            }
           }, 100);
         } else {
+          console.log('User not authenticated, clearing profile');
           setProfile(null);
         }
 
@@ -182,13 +194,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (error) {
           console.error('Error getting session:', error);
         } else {
-          console.log('Initial session check:', !!session);
+          console.log('Initial session check:', !!session, session?.user?.email);
           setSession(session);
           setUser(session?.user ?? null);
           
           if (session?.user) {
-            setTimeout(() => {
-              fetchUserProfile(session.user.id);
+            setTimeout(async () => {
+              await fetchUserProfile(session.user.id);
             }, 100);
           }
         }
@@ -216,6 +228,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       cleanupAuthState();
       
+      // Tentar logout global primeiro
       try {
         await supabase.auth.signOut({ scope: 'global' });
         console.log('Global signout completed');
@@ -230,34 +243,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Login error:', error);
+        setIsLoading(false);
         throw error;
       }
 
-      console.log('Login successful:', !!data.user);
+      console.log('Login successful for:', data.user?.email);
       
-      if (data.user) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
-
-        if (profileError) {
-          console.error('Error fetching profile for redirect:', profileError);
-          setTimeout(() => {
-            window.location.href = '/';
-          }, 500);
-        } else {
-          const profile: UserProfile = {
-            ...profileData,
-            tipo_usuario: profileData.tipo_usuario as 'client' | 'therapist'
-          };
-          
-          setTimeout(() => {
-            redirectUserAfterLogin(profile);
-          }, 500);
-        }
-      }
+      // Não fazer redirecionamento aqui - deixar o onAuthStateChange handle
+      // O loading será resetado pelo onAuthStateChange
+      
     } catch (error) {
       console.error('Login error:', error);
       setIsLoading(false);
@@ -289,6 +283,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Registration error:', error);
+        setIsLoading(false);
         throw error;
       }
 
@@ -296,16 +291,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (authData.user && !authData.session) {
         console.log('User needs to confirm email');
+        setIsLoading(false);
       } else if (authData.user && authData.session) {
-        console.log('Auto-login successful, waiting for profile creation');
-        
-        setTimeout(() => {
-          if (data.type === 'therapist') {
-            window.location.href = '/perfil-terapeuta';
-          } else {
-            window.location.href = '/dashboard-cliente';
-          }
-        }, 2000);
+        console.log('Auto-login successful, profile will be handled by onAuthStateChange');
+        // Deixar o onAuthStateChange handle o redirecionamento
       }
     } catch (error) {
       console.error('Registration error:', error);
