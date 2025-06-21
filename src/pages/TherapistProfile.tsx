@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -10,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTherapistProfile } from '@/hooks/useTherapistProfile';
@@ -48,23 +50,40 @@ const especialidadesOptions = [
   'Orientação Profissional'
 ];
 
+const estadosBrasileiros = [
+  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
+  'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN',
+  'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
+];
+
 const therapistProfileSchema = z.object({
   abordagem: z.string().min(1, 'Selecione uma abordagem terapêutica'),
   especialidades: z.array(z.string()).min(1, 'Selecione pelo menos uma especialidade'),
   pricePerSession: z.number().min(1, 'Informe o valor por sessão'),
   bio: z.string().min(50, 'A descrição deve ter pelo menos 50 caracteres'),
   cidade: z.string().min(2, 'Informe a cidade de atendimento'),
+  estado: z.string().min(2, 'Selecione o estado'),
+  experience: z.number().min(0, 'Informe os anos de experiência'),
+  offersOnline: z.boolean(),
+  offersInPerson: z.boolean(),
   formations: z.array(z.object({
     id: z.string(),
     institution: z.string().min(1, 'Informe a instituição'),
     year: z.string().min(4, 'Informe o ano de conclusão')
   })).min(1, 'Adicione pelo menos uma formação acadêmica'),
   photoUrl: z.string().optional()
+}).refine(data => data.offersOnline || data.offersInPerson, {
+  message: 'Selecione pelo menos uma modalidade de atendimento',
+  path: ['offersOnline']
 });
 
 type TherapistProfileFormData = z.infer<typeof therapistProfileSchema>;
 
-const TherapistProfile = () => {
+interface TherapistProfileProps {
+  isFirstTimeSetup?: boolean;
+}
+
+const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = false }) => {
   const [selectedEspecialidades, setSelectedEspecialidades] = useState<string[]>([]);
   const [formations, setFormations] = useState<Formation[]>([]);
   const [photoUrl, setPhotoUrl] = useState<string>('');
@@ -85,10 +104,15 @@ const TherapistProfile = () => {
     defaultValues: {
       especialidades: [],
       formations: [],
+      experience: 0,
+      offersOnline: false,
+      offersInPerson: false,
     },
   });
 
   const watchPrice = watch('pricePerSession');
+  const watchOffersOnline = watch('offersOnline');
+  const watchOffersInPerson = watch('offersInPerson');
 
   // Verificar se o usuário está autenticado e é terapeuta
   useEffect(() => {
@@ -136,6 +160,10 @@ const TherapistProfile = () => {
         especialidades: data.especialidades,
         abordagens: [data.abordagem],
         cidade: data.cidade,
+        estado: data.estado,
+        experience: data.experience,
+        offers_online: data.offersOnline,
+        offers_in_person: data.offersInPerson,
         price_per_session: data.pricePerSession,
         formacao: data.formations.map(f => ({
           institution: f.institution,
@@ -145,10 +173,17 @@ const TherapistProfile = () => {
 
       toast({
         title: 'Perfil salvo com sucesso!',
-        description: 'Seu perfil profissional foi criado. Bem-vindo ao Sequentia!',
+        description: isFirstTimeSetup 
+          ? 'Seu perfil profissional foi criado. Bem-vindo ao Sequentia!'
+          : 'Suas alterações foram salvas.',
       });
 
-      navigate('/');
+      // Redirecionamento baseado no contexto
+      if (isFirstTimeSetup) {
+        navigate('/dashboard-terapeuta');
+      } else {
+        navigate('/dashboard-terapeuta');
+      }
     } catch (error) {
       console.error('Error saving profile:', error);
       toast({
@@ -179,10 +214,13 @@ const TherapistProfile = () => {
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            Configure seu Perfil Profissional
+            {isFirstTimeSetup ? 'Complete seu Perfil Profissional' : 'Editar Perfil Profissional'}
           </h1>
           <p className="mt-2 text-gray-600">
-            Preencha as informações para criar seu perfil de terapeuta
+            {isFirstTimeSetup 
+              ? 'Preencha as informações para criar seu perfil de terapeuta'
+              : 'Atualize suas informações profissionais'
+            }
           </p>
         </div>
 
@@ -275,25 +313,113 @@ const TherapistProfile = () => {
                 )}
               </div>
 
-              {/* Valor por sessão */}
+              {/* Modalidade de atendimento */}
               <div>
-                <Label htmlFor="pricePerSession">Valor por Sessão (R$) *</Label>
-                <Input
-                  id="pricePerSession"
-                  type="number"
-                  step="0.01"
-                  placeholder="150.00"
-                  className="mt-1"
-                  {...register('pricePerSession', { valueAsNumber: true })}
-                />
-                {watchPrice && (
-                  <p className="mt-1 text-sm text-gray-600">
-                    Valor formatado: R$ {watchPrice.toFixed(2).replace('.', ',')}
-                  </p>
+                <Label>Modalidade de Atendimento *</Label>
+                <div className="mt-2 space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="offersOnline"
+                      checked={watchOffersOnline}
+                      onCheckedChange={(checked) => setValue('offersOnline', !!checked)}
+                    />
+                    <Label htmlFor="offersOnline" className="font-normal">
+                      Atendimento Online
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="offersInPerson"
+                      checked={watchOffersInPerson}
+                      onCheckedChange={(checked) => setValue('offersInPerson', !!checked)}
+                    />
+                    <Label htmlFor="offersInPerson" className="font-normal">
+                      Atendimento Presencial
+                    </Label>
+                  </div>
+                </div>
+                {errors.offersOnline && (
+                  <p className="mt-1 text-sm text-red-600">{errors.offersOnline.message}</p>
                 )}
-                {errors.pricePerSession && (
-                  <p className="mt-1 text-sm text-red-600">{errors.pricePerSession.message}</p>
-                )}
+              </div>
+
+              {/* Cidade e Estado */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="cidade">Cidade de Atendimento *</Label>
+                  <Input
+                    id="cidade"
+                    placeholder="Ex: São Paulo"
+                    className="mt-1"
+                    {...register('cidade')}
+                  />
+                  {errors.cidade && (
+                    <p className="mt-1 text-sm text-red-600">{errors.cidade.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="estado">Estado *</Label>
+                  <Controller
+                    name="estado"
+                    control={control}
+                    render={({ field }) => (
+                      <Select onValueChange={(value) => setValue('estado', value)}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Selecione o estado" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {estadosBrasileiros.map((estado) => (
+                            <SelectItem key={estado} value={estado}>
+                              {estado}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.estado && (
+                    <p className="mt-1 text-sm text-red-600">{errors.estado.message}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Experiência e Valor */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="experience">Anos de Experiência *</Label>
+                  <Input
+                    id="experience"
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    className="mt-1"
+                    {...register('experience', { valueAsNumber: true })}
+                  />
+                  {errors.experience && (
+                    <p className="mt-1 text-sm text-red-600">{errors.experience.message}</p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="pricePerSession">Valor por Sessão (R$) *</Label>
+                  <Input
+                    id="pricePerSession"
+                    type="number"
+                    step="0.01"
+                    placeholder="150.00"
+                    className="mt-1"
+                    {...register('pricePerSession', { valueAsNumber: true })}
+                  />
+                  {watchPrice &&  (
+                    <p className="mt-1 text-sm text-gray-600">
+                      Valor formatado: R$ {watchPrice.toFixed(2).replace('.', ',')}
+                    </p>
+                  )}
+                  {errors.pricePerSession && (
+                    <p className="mt-1 text-sm text-red-600">{errors.pricePerSession.message}</p>
+                  )}
+                </div>
               </div>
 
               {/* Bio/Descrição */}
@@ -321,20 +447,6 @@ const TherapistProfile = () => {
               {errors.formations && (
                 <p className="mt-1 text-sm text-red-600">{errors.formations.message}</p>
               )}
-
-              {/* Cidade */}
-              <div>
-                <Label htmlFor="cidade">Cidade de Atendimento *</Label>
-                <Input
-                  id="cidade"
-                  placeholder="Ex: São Paulo, SP"
-                  className="mt-1"
-                  {...register('cidade')}
-                />
-                {errors.cidade && (
-                  <p className="mt-1 text-sm text-red-600">{errors.cidade.message}</p>
-                )}
-              </div>
 
               <Button
                 type="submit"

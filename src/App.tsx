@@ -73,10 +73,18 @@ const App = () => (
               }
             />
             <Route 
+              path="/completar-cadastro-terapeuta" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <TherapistProfile isFirstTimeSetup={true} />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
               path="/perfil-terapeuta" 
               element={
                 <ProtectedRoute requireAuth={true}>
-                  <TherapistProfile />
+                  <TherapistProfile isFirstTimeSetup={false} />
                 </ProtectedRoute>
               }
             />

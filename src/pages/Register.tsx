@@ -65,9 +65,9 @@ const Register = () => {
           : 'Verifique seu e-mail para confirmar sua conta.',
       });
       
-      // Redirecionamento condicional
+      // Redirecionamento condicional corrigido
       if (data.type === 'therapist') {
-        navigate('/perfil-terapeuta');
+        navigate('/completar-cadastro-terapeuta');
       } else {
         navigate('/login');
       }

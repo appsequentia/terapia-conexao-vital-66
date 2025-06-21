@@ -11,6 +11,10 @@ export interface TherapistProfileData {
   especialidades: string[];
   abordagens: string[];
   cidade: string;
+  estado?: string;
+  experience?: number;
+  offers_online?: boolean;
+  offers_in_person?: boolean;
   price_per_session: number;
   formacao: Array<{
     institution: string;
@@ -42,12 +46,13 @@ export const useTherapistProfile = () => {
           especialidades: data.especialidades,
           abordagens: data.abordagens,
           cidade: data.cidade,
+          estado: data.estado,
+          experience: data.experience || 0,
+          offers_online: data.offers_online || false,
+          offers_in_person: data.offers_in_person || false,
           price_per_session: data.price_per_session,
-          formacao: data.formacao, // Agora é JSONB, não precisa serializar
-          offers_online: true,
-          offers_in_person: true,
+          formacao: data.formacao,
           is_online: true,
-          experience: 0,
           rating: 0,
           review_count: 0
         })
