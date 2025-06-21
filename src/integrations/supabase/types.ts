@@ -47,7 +47,9 @@ export type Database = {
           abordagens: string[] | null
           bio: string | null
           cidade: string | null
+          consultorio_nome: string | null
           created_at: string | null
+          crp_numero: string | null
           email: string
           especialidades: string[] | null
           estado: string | null
@@ -70,7 +72,9 @@ export type Database = {
           abordagens?: string[] | null
           bio?: string | null
           cidade?: string | null
+          consultorio_nome?: string | null
           created_at?: string | null
+          crp_numero?: string | null
           email: string
           especialidades?: string[] | null
           estado?: string | null
@@ -93,7 +97,9 @@ export type Database = {
           abordagens?: string[] | null
           bio?: string | null
           cidade?: string | null
+          consultorio_nome?: string | null
           created_at?: string | null
+          crp_numero?: string | null
           email?: string
           especialidades?: string[] | null
           estado?: string | null

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -71,7 +72,9 @@ const therapistProfileSchema = z.object({
     institution: z.string().min(1, 'Informe a instituição'),
     year: z.string().min(4, 'Informe o ano de conclusão')
   })).min(1, 'Adicione pelo menos uma formação acadêmica'),
-  photoUrl: z.string().optional()
+  photoUrl: z.string().optional(),
+  consultorioNome: z.string().optional(),
+  crpNumero: z.string().optional()
 }).refine(data => data.offersOnline || data.offersInPerson, {
   message: 'Selecione pelo menos uma modalidade de atendimento',
   path: ['offersOnline']
@@ -109,6 +112,8 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
       experience: 0,
       offersOnline: false,
       offersInPerson: false,
+      consultorioNome: '',
+      crpNumero: '',
     },
   });
 
@@ -150,7 +155,9 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
         offersOnline: existingData.offers_online || false,
         offersInPerson: existingData.offers_in_person || false,
         formations: parsedFormacao,
-        photoUrl: existingData.foto_url || ''
+        photoUrl: existingData.foto_url || '',
+        consultorioNome: existingData.consultorio_nome || '',
+        crpNumero: existingData.crp_numero || ''
       });
 
       // Atualizar estados locais
@@ -214,17 +221,19 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
         formacao: data.formations.map(f => ({
           institution: f.institution,
           year: f.year
-        }))
+        })),
+        consultorio_nome: data.consultorioNome,
+        crp_numero: data.crpNumero
       });
 
       toast({
-        title: isFirstTimeSetup ? 'Perfil salvo com sucesso!' : 'Perfil atualizado com sucesso!',
+        title: isFirstTimeSetup ? 'Perfil criado com sucesso!' : 'Perfil atualizado com sucesso!',
         description: isFirstTimeSetup 
-          ? 'Seu perfil profissional foi criado. Bem-vindo ao Sequentia!'
+          ? 'Bem-vindo ao Sequentia! Seu perfil profissional está completo.'
           : 'Suas alterações foram salvas com sucesso.',
       });
 
-      // Sempre redirecionar para o dashboard
+      // Sempre redirecionar para o dashboard após salvar
       navigate('/dashboard-terapeuta');
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -282,6 +291,28 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
                     size="lg"
                   />
                 </div>
+              </div>
+
+              {/* Nome do consultório (novo campo) */}
+              <div>
+                <Label htmlFor="consultorioNome">Nome do Consultório (opcional)</Label>
+                <Input
+                  id="consultorioNome"
+                  placeholder="Ex: Clínica Bem-Estar"
+                  className="mt-1"
+                  {...register('consultorioNome')}
+                />
+              </div>
+
+              {/* CRP/Registro profissional (novo campo) */}
+              <div>
+                <Label htmlFor="crpNumero">CRP ou Registro Profissional (opcional)</Label>
+                <Input
+                  id="crpNumero"
+                  placeholder="Ex: CRP 12/34567"
+                  className="mt-1"
+                  {...register('crpNumero')}
+                />
               </div>
 
               {/* Abordagem terapêutica */}
@@ -497,7 +528,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
               >
                 {isPending 
                   ? (isFirstTimeSetup ? 'Salvando perfil...' : 'Atualizando perfil...')
-                  : (isFirstTimeSetup ? 'Salvar perfil' : 'Atualizar perfil')
+                  : (isFirstTimeSetup ? 'Concluir cadastro' : 'Atualizar perfil')
                 }
               </Button>
             </form>

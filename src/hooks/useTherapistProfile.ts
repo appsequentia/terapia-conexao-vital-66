@@ -20,6 +20,8 @@ export interface TherapistProfileData {
     institution: string;
     year: string;
   }>;
+  consultorio_nome?: string;
+  crp_numero?: string;
 }
 
 export const useTherapistProfile = () => {
@@ -61,6 +63,8 @@ export const useTherapistProfile = () => {
         offers_in_person: data.offers_in_person || false,
         price_per_session: data.price_per_session,
         formacao: data.formacao,
+        consultorio_nome: data.consultorio_nome,
+        crp_numero: data.crp_numero,
         is_online: true,
         rating: 0,
         review_count: 0
