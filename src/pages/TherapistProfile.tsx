@@ -116,15 +116,32 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
   const watchOffersOnline = watch('offersOnline');
   const watchOffersInPerson = watch('offersInPerson');
 
+  // Helper function to safely parse formacao from Supabase
+  const parseFormacao = (formacao: any): Formation[] => {
+    if (!formacao) return [];
+    
+    if (Array.isArray(formacao)) {
+      return formacao.map((f: any, index: number) => ({
+        id: `${index}`,
+        institution: f.institution || '',
+        year: f.year || ''
+      }));
+    }
+    
+    return [];
+  };
+
   // Carregar dados existentes se não for primeiro cadastro
   useEffect(() => {
     if (!isFirstTimeSetup && existingData && !dataLoading) {
       console.log('Loading existing therapist data:', existingData);
       
+      const parsedFormacao = parseFormacao(existingData.formacao);
+      
       // Resetar o formulário com os dados existentes
       reset({
-        abordagem: existingData.abordagens?.[0] || '',
-        especialidades: existingData.especialidades || [],
+        abordagem: Array.isArray(existingData.abordagens) && existingData.abordagens.length > 0 ? existingData.abordagens[0] : '',
+        especialidades: Array.isArray(existingData.especialidades) ? existingData.especialidades : [],
         pricePerSession: Number(existingData.price_per_session) || 0,
         bio: existingData.bio || '',
         cidade: existingData.cidade || '',
@@ -132,21 +149,13 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
         experience: Number(existingData.experience) || 0,
         offersOnline: existingData.offers_online || false,
         offersInPerson: existingData.offers_in_person || false,
-        formations: existingData.formacao ? existingData.formacao.map((f: any, index: number) => ({
-          id: `${index}`,
-          institution: f.institution || '',
-          year: f.year || ''
-        })) : [],
+        formations: parsedFormacao,
         photoUrl: existingData.foto_url || ''
       });
 
       // Atualizar estados locais
-      setSelectedEspecialidades(existingData.especialidades || []);
-      setFormations(existingData.formacao ? existingData.formacao.map((f: any, index: number) => ({
-        id: `${index}`,
-        institution: f.institution || '',
-        year: f.year || ''
-      })) : []);
+      setSelectedEspecialidades(Array.isArray(existingData.especialidades) ? existingData.especialidades : []);
+      setFormations(parsedFormacao);
       setPhotoUrl(existingData.foto_url || '');
     }
   }, [existingData, dataLoading, isFirstTimeSetup, reset]);
