@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +18,7 @@ interface AuthContextType {
   profile: Profile | null;
   session: Session | null;
   isLoading: boolean;
+  isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
@@ -54,6 +54,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+
+  // Computed property for backward compatibility
+  const isAuthenticated = !!user && !!session;
 
   // Helper function to check if user is in registration flow
   const isInRegistrationFlow = () => {
@@ -268,6 +271,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     profile,
     session,
     isLoading,
+    isAuthenticated,
     login,
     register,
     logout,
