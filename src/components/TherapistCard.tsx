@@ -16,6 +16,17 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
   const navigate = useNavigate();
   const { isFavorite, toggleFavorite } = useFavorites();
 
+  console.log('TherapistCard - Rendering therapist:', {
+    id: therapist.id,
+    name: therapist.name,
+    hasSpecialties: Array.isArray(therapist.specialties),
+    specialtiesCount: therapist.specialties?.length || 0,
+    hasApproaches: Array.isArray(therapist.approaches),
+    approachesCount: therapist.approaches?.length || 0,
+    specialties: therapist.specialties?.map(s => s.name) || [],
+    approaches: therapist.approaches?.map(a => a.name) || []
+  });
+
   const handleViewProfile = () => {
     navigate(`/terapeuta/${therapist.id}`);
   };
@@ -31,14 +42,24 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
     navigate(`/terapeuta/${therapist.id}`);
   };
 
+  // Safe fallback for missing data
+  const therapistName = therapist.name || 'Nome não disponível';
+  const therapistSpecialties = Array.isArray(therapist.specialties) ? therapist.specialties : [];
+  const therapistApproaches = Array.isArray(therapist.approaches) ? therapist.approaches : [];
+  const therapistRating = therapist.rating || 0;
+  const therapistReviewCount = therapist.reviewCount || 0;
+  const therapistPrice = therapist.pricePerSession || 0;
+  const therapistBio = therapist.bio || 'Biografia não disponível';
+  const therapistExperience = therapist.experience || 0;
+
   return (
     <div className="therapist-card p-6 hover:shadow-md transition-shadow duration-200">
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
           <Avatar className="w-20 h-20">
-            <AvatarImage src={therapist.photo} alt={therapist.name} />
-            <AvatarFallback>{therapist.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+            <AvatarImage src={therapist.photo} alt={therapistName} />
+            <AvatarFallback>{therapistName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
           </Avatar>
         </div>
 
@@ -48,7 +69,7 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-semibold text-gray-900 truncate">
-                  {therapist.name}
+                  {therapistName}
                 </h3>
                 <Button
                   variant="ghost"
@@ -69,8 +90,8 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <div className="flex items-center">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="ml-1">{therapist.rating}</span>
-                  <span className="ml-1">({therapist.reviewCount} avaliações)</span>
+                  <span className="ml-1">{therapistRating}</span>
+                  <span className="ml-1">({therapistReviewCount} avaliações)</span>
                 </div>
                 {therapist.isOnline && (
                   <Badge variant="secondary" className="bg-green-100 text-green-800">
@@ -81,7 +102,7 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
             </div>
             <div className="text-right">
               <div className="text-lg font-semibold text-primary">
-                R$ {therapist.pricePerSession}
+                R$ {therapistPrice}
               </div>
               <div className="text-sm text-gray-500">por sessão</div>
             </div>
@@ -89,19 +110,24 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
 
           {/* Bio */}
           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-            {therapist.bio}
+            {therapistBio}
           </p>
 
           {/* Specialties */}
           <div className="flex flex-wrap gap-1 mb-3">
-            {therapist.specialties.slice(0, 3).map((specialty) => (
+            {therapistSpecialties.slice(0, 3).map((specialty) => (
               <Badge key={specialty.id} variant="outline" className="text-xs">
                 {specialty.name}
               </Badge>
             ))}
-            {therapist.specialties.length > 3 && (
+            {therapistSpecialties.length > 3 && (
               <Badge variant="outline" className="text-xs">
-                +{therapist.specialties.length - 3} mais
+                +{therapistSpecialties.length - 3} mais
+              </Badge>
+            )}
+            {therapistSpecialties.length === 0 && (
+              <Badge variant="outline" className="text-xs text-gray-400">
+                Especialidades não informadas
               </Badge>
             )}
           </div>
@@ -110,13 +136,13 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
           <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
             <div className="flex items-center">
               <MapPin className="h-4 w-4 mr-1" />
-              {therapist.location.city}, {therapist.location.state}
+              {therapist.location?.city || 'Cidade não informada'}, {therapist.location?.state || 'Estado não informado'}
             </div>
             <div className="flex items-center">
               <Clock className="h-4 w-4 mr-1" />
-              {therapist.experience} anos de experiência
+              {therapistExperience} anos de experiência
             </div>
-            {therapist.location.offersOnline && (
+            {therapist.location?.offersOnline && (
               <div className="flex items-center">
                 <Video className="h-4 w-4 mr-1" />
                 Atendimento online

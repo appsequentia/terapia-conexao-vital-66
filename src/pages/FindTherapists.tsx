@@ -42,6 +42,18 @@ const FindTherapists = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
+  console.log('FindTherapists - Component state:', {
+    therapistsCount: therapists.length,
+    filteredCount: filteredTherapists.length,
+    isLoading,
+    error: !!error,
+    firstTherapist: therapists[0] ? {
+      name: therapists[0].name,
+      specialties: therapists[0].specialties?.length || 0,
+      approaches: therapists[0].approaches?.length || 0
+    } : null
+  });
+
   // Initialize search from URL parameters
   useEffect(() => {
     const queryParam = searchParams.get('q') || '';
@@ -53,8 +65,11 @@ const FindTherapists = () => {
 
   // Use therapists data once loaded and apply initial filtering
   useEffect(() => {
+    console.log('FindTherapists - Therapists data changed:', therapists.length);
     if (therapists.length > 0) {
       applyFilters(filters, searchQuery, location);
+    } else {
+      setFilteredTherapists([]);
     }
   }, [therapists, searchQuery, location]);
 
@@ -65,6 +80,7 @@ const FindTherapists = () => {
   const currentTherapists = filteredTherapists.slice(startIndex, endIndex);
 
   const handleSearch = (query: string, loc: string) => {
+    console.log('FindTherapists - Search triggered:', { query, loc });
     setSearchQuery(query);
     setLocation(loc);
     
@@ -78,58 +94,78 @@ const FindTherapists = () => {
   };
 
   const handleFilterChange = (newFilters: SearchFilters) => {
+    console.log('FindTherapists - Filters changed:', newFilters);
     setFilters(newFilters);
     applyFilters(newFilters, searchQuery, location);
   };
 
   const applyFilters = (currentFilters: SearchFilters, query: string, loc: string) => {
+    console.log('FindTherapists - Applying filters:', {
+      totalTherapists: therapists.length,
+      query,
+      loc,
+      filters: currentFilters
+    });
+
     let filtered = [...therapists];
 
-    // Search query filter
+    // Search query filter - improved to handle array properties correctly
     if (query) {
-      filtered = filtered.filter(therapist => 
-        therapist.name.toLowerCase().includes(query.toLowerCase()) ||
-        therapist.bio.toLowerCase().includes(query.toLowerCase()) ||
-        therapist.specialties.some(spec => spec.name.toLowerCase().includes(query.toLowerCase())) ||
-        therapist.approaches.some(app => app.name.toLowerCase().includes(query.toLowerCase()))
-      );
+      filtered = filtered.filter(therapist => {
+        const nameMatch = therapist.name?.toLowerCase().includes(query.toLowerCase());
+        const bioMatch = therapist.bio?.toLowerCase().includes(query.toLowerCase());
+        
+        // Handle specialties array properly
+        const specialtyMatch = therapist.specialties?.some(spec => 
+          spec.name?.toLowerCase().includes(query.toLowerCase())
+        );
+        
+        // Handle approaches array properly
+        const approachMatch = therapist.approaches?.some(app => 
+          app.name?.toLowerCase().includes(query.toLowerCase())
+        );
+
+        return nameMatch || bioMatch || specialtyMatch || approachMatch;
+      });
     }
 
     // Location filter
     if (loc) {
       filtered = filtered.filter(therapist => 
-        therapist.location.city.toLowerCase().includes(loc.toLowerCase()) ||
-        therapist.location.state.toLowerCase().includes(loc.toLowerCase())
+        therapist.location?.city?.toLowerCase().includes(loc.toLowerCase()) ||
+        therapist.location?.state?.toLowerCase().includes(loc.toLowerCase())
       );
     }
 
-    // Specialties filter
+    // Specialties filter - fix to work with new structure
     if (currentFilters.specialties.length > 0) {
       filtered = filtered.filter(therapist =>
-        therapist.specialties.some(spec => currentFilters.specialties.includes(spec.id))
+        therapist.specialties?.some(spec => currentFilters.specialties.includes(spec.id))
       );
     }
 
-    // Approaches filter
+    // Approaches filter - fix to work with new structure
     if (currentFilters.approaches.length > 0) {
       filtered = filtered.filter(therapist =>
-        therapist.approaches.some(app => currentFilters.approaches.includes(app.id))
+        therapist.approaches?.some(app => currentFilters.approaches.includes(app.id))
       );
     }
 
     // Price range filter
-    filtered = filtered.filter(therapist =>
-      therapist.pricePerSession >= currentFilters.priceRange.min &&
-      therapist.pricePerSession <= currentFilters.priceRange.max
-    );
+    if (currentFilters.priceRange) {
+      filtered = filtered.filter(therapist =>
+        therapist.pricePerSession >= currentFilters.priceRange.min &&
+        therapist.pricePerSession <= currentFilters.priceRange.max
+      );
+    }
 
     // Session type filter
     if (currentFilters.sessionType !== 'both') {
       filtered = filtered.filter(therapist => {
         if (currentFilters.sessionType === 'online') {
-          return therapist.location.offersOnline;
+          return therapist.location?.offersOnline;
         } else {
-          return therapist.location.offersInPerson;
+          return therapist.location?.offersInPerson;
         }
       });
     }
@@ -142,7 +178,7 @@ const FindTherapists = () => {
     // Languages filter
     if (currentFilters.languages.length > 0) {
       filtered = filtered.filter(therapist =>
-        currentFilters.languages.some(lang => therapist.languages.includes(lang))
+        currentFilters.languages.some(lang => therapist.languages?.includes(lang))
       );
     }
 
@@ -150,16 +186,22 @@ const FindTherapists = () => {
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'rating':
-          return b.rating - a.rating;
+          return (b.rating || 0) - (a.rating || 0);
         case 'price-low':
-          return a.pricePerSession - b.pricePerSession;
+          return (a.pricePerSession || 0) - (b.pricePerSession || 0);
         case 'price-high':
-          return b.pricePerSession - a.pricePerSession;
+          return (b.pricePerSession || 0) - (a.pricePerSession || 0);
         case 'experience':
-          return b.experience - a.experience;
+          return (b.experience || 0) - (a.experience || 0);
         default:
-          return b.rating - a.rating;
+          return (b.rating || 0) - (a.rating || 0);
       }
+    });
+
+    console.log('FindTherapists - Filter results:', {
+      originalCount: therapists.length,
+      filteredCount: filtered.length,
+      hasResults: filtered.length > 0
     });
 
     setFilteredTherapists(filtered);
@@ -167,6 +209,7 @@ const FindTherapists = () => {
   };
 
   const clearFilters = () => {
+    console.log('FindTherapists - Clearing all filters');
     const clearedFilters: SearchFilters = {
       specialties: [],
       approaches: [],
@@ -185,6 +228,7 @@ const FindTherapists = () => {
   };
 
   if (error) {
+    console.error('FindTherapists - Render error:', error);
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -277,11 +321,16 @@ const FindTherapists = () => {
             ) : currentTherapists.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-500 text-lg mb-4">
-                  Nenhum terapeuta encontrado com os filtros aplicados.
+                  {filteredTherapists.length === 0 && therapists.length === 0 
+                    ? 'Nenhum terapeusta cadastrado ainda.' 
+                    : 'Nenhum terapeuta encontrado com os filtros aplicados.'
+                  }
                 </p>
-                <Button onClick={clearFilters} variant="outline">
-                  Limpar Filtros
-                </Button>
+                {filteredTherapists.length === 0 && therapists.length > 0 && (
+                  <Button onClick={clearFilters} variant="outline">
+                    Limpar Filtros
+                  </Button>
+                )}
               </div>
             ) : (
               <>

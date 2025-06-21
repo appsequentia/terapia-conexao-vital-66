@@ -24,22 +24,32 @@ export interface SupabaseTherapist {
 export function mapSupabaseToTherapist(supabaseTherapist: SupabaseTherapist): import('./therapist').TherapistProfile {
   console.log('Mapping Supabase therapist:', supabaseTherapist);
   
-  return {
+  // Ensure specialties is always an array and map correctly
+  const specialties = (supabaseTherapist.especialidades || []).map((esp, index) => ({
+    id: `${supabaseTherapist.id}-specialty-${index}`,
+    name: esp,
+    category: 'other' as const
+  }));
+
+  // Ensure approaches is always an array and map correctly  
+  const approaches = (supabaseTherapist.abordagens || []).map((abr, index) => ({
+    id: `${supabaseTherapist.id}-approach-${index}`,
+    name: abr,
+    abbreviation: abr.split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 4) // Limit to 4 characters
+  }));
+
+  const mapped = {
     id: supabaseTherapist.id,
     name: supabaseTherapist.nome,
     email: supabaseTherapist.email,
     photo: supabaseTherapist.foto_url || '',
     bio: supabaseTherapist.bio || '',
-    specialties: (supabaseTherapist.especialidades || []).map((esp, index) => ({
-      id: `${supabaseTherapist.id}-specialty-${index}`,
-      name: esp,
-      category: 'other' as const
-    })),
-    approaches: (supabaseTherapist.abordagens || []).map((abr, index) => ({
-      id: `${supabaseTherapist.id}-approach-${index}`,
-      name: abr,
-      abbreviation: abr.split(' ').map(word => word[0]).join('').toUpperCase()
-    })),
+    specialties,
+    approaches,
     rating: supabaseTherapist.rating || 0,
     reviewCount: supabaseTherapist.review_count || 0,
     pricePerSession: supabaseTherapist.price_per_session || 0,
@@ -57,4 +67,15 @@ export function mapSupabaseToTherapist(supabaseTherapist: SupabaseTherapist): im
     createdAt: supabaseTherapist.created_at,
     updatedAt: supabaseTherapist.updated_at
   };
+
+  console.log('Mapped therapist result:', {
+    id: mapped.id,
+    name: mapped.name,
+    specialtiesCount: mapped.specialties.length,
+    approachesCount: mapped.approaches.length,
+    specialties: mapped.specialties,
+    approaches: mapped.approaches
+  });
+  
+  return mapped;
 }
