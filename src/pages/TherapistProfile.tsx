@@ -70,7 +70,7 @@ const therapistProfileSchema = z.object({
     id: z.string(),
     institution: z.string().min(1, 'Informe a instituição'),
     year: z.string().min(4, 'Informe o ano de conclusão')
-  })),
+  })).optional(),
   photoUrl: z.string().optional(),
   hasProfessionalRegistry: z.boolean(),
   crpNumero: z.string().optional()
@@ -143,6 +143,9 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
       
       const parsedFormacao = parseFormacao(existingData.formacao);
       
+      // Determine if has professional registry based on crp_numero
+      const hasProfessionalRegistry = !!(existingData.crp_numero && existingData.crp_numero.trim());
+      
       // Resetar o formulário com os dados existentes
       reset({
         abordagem: Array.isArray(existingData.abordagens) && existingData.abordagens.length > 0 ? existingData.abordagens[0] : '',
@@ -156,7 +159,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
         offersInPerson: existingData.offers_in_person || false,
         formations: parsedFormacao,
         photoUrl: existingData.foto_url || '',
-        hasProfessionalRegistry: existingData.has_professional_registry || false,
+        hasProfessionalRegistry: hasProfessionalRegistry,
         crpNumero: existingData.crp_numero || ''
       });
 
@@ -218,10 +221,10 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
         offers_online: data.offersOnline,
         offers_in_person: data.offersInPerson,
         price_per_session: data.pricePerSession,
-        formacao: data.formations.map(f => ({
+        formacao: data.formations?.map(f => ({
           institution: f.institution,
           year: f.year
-        })),
+        })) || [],
         crp_numero: data.hasProfessionalRegistry ? data.crpNumero : undefined
       });
 
