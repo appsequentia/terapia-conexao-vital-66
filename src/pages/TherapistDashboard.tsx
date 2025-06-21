@@ -2,11 +2,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, DollarSign, MessageCircle, LogOut } from 'lucide-react';
+import { Calendar, Users, DollarSign, MessageCircle, LogOut, User } from 'lucide-react';
 import { getPersonalizedGreeting } from '@/utils/greetingUtils';
+import { useNavigate } from 'react-router-dom';
 
 const TherapistDashboard = () => {
   const { profile, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -15,6 +17,10 @@ const TherapistDashboard = () => {
     } catch (error) {
       console.error('Dashboard - Erro ao fazer logout:', error);
     }
+  };
+
+  const handleEditProfile = () => {
+    navigate('/editar-perfil-terapeuta');
   };
 
   return (
@@ -133,6 +139,14 @@ const TherapistDashboard = () => {
               <Button variant="outline" className="w-full justify-start">
                 <MessageCircle className="w-4 h-4 mr-2" />
                 Mensagens
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={handleEditProfile}
+              >
+                <User className="w-4 h-4 mr-2" />
+                Editar Perfil Profissional
               </Button>
             </CardContent>
           </Card>

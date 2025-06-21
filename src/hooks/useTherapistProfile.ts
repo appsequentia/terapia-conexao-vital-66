@@ -34,38 +34,72 @@ export const useTherapistProfile = () => {
       console.log('Saving therapist profile for user:', user.id);
       console.log('Profile data:', data);
 
-      // Inserir dados na tabela terapeutas
-      const { data: result, error } = await supabase
+      // Primeiro, verificar se o terapeuta já existe
+      const { data: existingTherapist, error: checkError } = await supabase
         .from('terapeutas')
-        .insert({
-          user_id: user.id,
-          nome: data.nome,
-          email: data.email,
-          foto_url: data.foto_url,
-          bio: data.bio,
-          especialidades: data.especialidades,
-          abordagens: data.abordagens,
-          cidade: data.cidade,
-          estado: data.estado,
-          experience: data.experience || 0,
-          offers_online: data.offers_online || false,
-          offers_in_person: data.offers_in_person || false,
-          price_per_session: data.price_per_session,
-          formacao: data.formacao,
-          is_online: true,
-          rating: 0,
-          review_count: 0
-        })
-        .select()
-        .single();
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (error) {
-        console.error('Error saving therapist profile:', error);
-        throw error;
+      if (checkError) {
+        console.error('Error checking existing therapist:', checkError);
+        throw checkError;
       }
 
-      console.log('Therapist profile saved successfully:', result);
-      return result;
+      const therapistData = {
+        user_id: user.id,
+        nome: data.nome,
+        email: data.email,
+        foto_url: data.foto_url,
+        bio: data.bio,
+        especialidades: data.especialidades,
+        abordagens: data.abordagens,
+        cidade: data.cidade,
+        estado: data.estado,
+        experience: data.experience || 0,
+        offers_online: data.offers_online || false,
+        offers_in_person: data.offers_in_person || false,
+        price_per_session: data.price_per_session,
+        formacao: data.formacao,
+        is_online: true,
+        rating: 0,
+        review_count: 0
+      };
+
+      if (existingTherapist) {
+        // UPDATE - terapeuta já existe
+        console.log('Updating existing therapist profile');
+        const { data: result, error } = await supabase
+          .from('terapeutas')
+          .update(therapistData)
+          .eq('user_id', user.id)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error updating therapist profile:', error);
+          throw error;
+        }
+
+        console.log('Therapist profile updated successfully:', result);
+        return result;
+      } else {
+        // INSERT - novo terapeuta
+        console.log('Creating new therapist profile');
+        const { data: result, error } = await supabase
+          .from('terapeutas')
+          .insert(therapistData)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Error creating therapist profile:', error);
+          throw error;
+        }
+
+        console.log('Therapist profile created successfully:', result);
+        return result;
+      }
     },
   });
 };

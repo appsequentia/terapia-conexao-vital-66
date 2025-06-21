@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -83,6 +84,14 @@ const App = () => (
             />
             <Route 
               path="/perfil-terapeuta" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <TherapistProfile isFirstTimeSetup={false} />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/editar-perfil-terapeuta" 
               element={
                 <ProtectedRoute requireAuth={true}>
                   <TherapistProfile isFirstTimeSetup={false} />

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -15,6 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTherapistProfile } from '@/hooks/useTherapistProfile';
+import { useTherapistData } from '@/hooks/useTherapistData';
 import ImageUpload from '@/components/ImageUpload';
 import FormationInput, { Formation } from '@/components/FormationInput';
 import { X } from 'lucide-react';
@@ -89,6 +89,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
   const [photoUrl, setPhotoUrl] = useState<string>('');
   const { user, profile, isLoading: authLoading } = useAuth();
   const { mutate: saveProfile, isPending } = useTherapistProfile();
+  const { data: existingData, isLoading: dataLoading } = useTherapistData();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -98,6 +99,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
     control,
     setValue,
     watch,
+    reset,
     formState: { errors },
   } = useForm<TherapistProfileFormData>({
     resolver: zodResolver(therapistProfileSchema),
@@ -113,6 +115,41 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
   const watchPrice = watch('pricePerSession');
   const watchOffersOnline = watch('offersOnline');
   const watchOffersInPerson = watch('offersInPerson');
+
+  // Carregar dados existentes se não for primeiro cadastro
+  useEffect(() => {
+    if (!isFirstTimeSetup && existingData && !dataLoading) {
+      console.log('Loading existing therapist data:', existingData);
+      
+      // Resetar o formulário com os dados existentes
+      reset({
+        abordagem: existingData.abordagens?.[0] || '',
+        especialidades: existingData.especialidades || [],
+        pricePerSession: Number(existingData.price_per_session) || 0,
+        bio: existingData.bio || '',
+        cidade: existingData.cidade || '',
+        estado: existingData.estado || '',
+        experience: Number(existingData.experience) || 0,
+        offersOnline: existingData.offers_online || false,
+        offersInPerson: existingData.offers_in_person || false,
+        formations: existingData.formacao ? existingData.formacao.map((f: any, index: number) => ({
+          id: `${index}`,
+          institution: f.institution || '',
+          year: f.year || ''
+        })) : [],
+        photoUrl: existingData.foto_url || ''
+      });
+
+      // Atualizar estados locais
+      setSelectedEspecialidades(existingData.especialidades || []);
+      setFormations(existingData.formacao ? existingData.formacao.map((f: any, index: number) => ({
+        id: `${index}`,
+        institution: f.institution || '',
+        year: f.year || ''
+      })) : []);
+      setPhotoUrl(existingData.foto_url || '');
+    }
+  }, [existingData, dataLoading, isFirstTimeSetup, reset]);
 
   // Verificar se o usuário está autenticado e é terapeuta
   useEffect(() => {
@@ -172,18 +209,14 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
       });
 
       toast({
-        title: 'Perfil salvo com sucesso!',
+        title: isFirstTimeSetup ? 'Perfil salvo com sucesso!' : 'Perfil atualizado com sucesso!',
         description: isFirstTimeSetup 
           ? 'Seu perfil profissional foi criado. Bem-vindo ao Sequentia!'
-          : 'Suas alterações foram salvas.',
+          : 'Suas alterações foram salvas com sucesso.',
       });
 
-      // Redirecionamento baseado no contexto
-      if (isFirstTimeSetup) {
-        navigate('/dashboard-terapeuta');
-      } else {
-        navigate('/dashboard-terapeuta');
-      }
+      // Sempre redirecionar para o dashboard
+      navigate('/dashboard-terapeuta');
     } catch (error) {
       console.error('Error saving profile:', error);
       toast({
@@ -194,7 +227,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
     }
   };
 
-  if (authLoading) {
+  if (authLoading || (!isFirstTimeSetup && dataLoading)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -249,7 +282,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
                   name="abordagem"
                   control={control}
                   render={({ field }) => (
-                    <Select onValueChange={(value) => setValue('abordagem', value)}>
+                    <Select onValueChange={(value) => setValue('abordagem', value)} value={field.value}>
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Selecione sua abordagem principal" />
                       </SelectTrigger>
@@ -364,7 +397,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
                     name="estado"
                     control={control}
                     render={({ field }) => (
-                      <Select onValueChange={(value) => setValue('estado', value)}>
+                      <Select onValueChange={(value) => setValue('estado', value)} value={field.value}>
                         <SelectTrigger className="mt-1">
                           <SelectValue placeholder="Selecione o estado" />
                         </SelectTrigger>
@@ -453,7 +486,10 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
                 className="w-full"
                 disabled={isPending}
               >
-                {isPending ? 'Salvando perfil...' : 'Salvar perfil'}
+                {isPending 
+                  ? (isFirstTimeSetup ? 'Salvando perfil...' : 'Atualizando perfil...')
+                  : (isFirstTimeSetup ? 'Salvar perfil' : 'Atualizar perfil')
+                }
               </Button>
             </form>
           </CardContent>
