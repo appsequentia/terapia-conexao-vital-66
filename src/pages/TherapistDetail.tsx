@@ -7,19 +7,44 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/Header';
 import { useTherapistDetail } from '@/hooks/useTherapistDetail';
+import { useFavorites } from '@/hooks/useFavorites';
+import { cn } from '@/lib/utils';
 
 const TherapistDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: therapist, isLoading, error } = useTherapistDetail(id || '');
+  const { isFavorite, toggleFavorite } = useFavorites();
+
+  const handleToggleFavorite = () => {
+    if (therapist) {
+      toggleFavorite(therapist.id);
+    }
+  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">Carregando perfil do terapeuta...</p>
+          <div className="animate-pulse">
+            <div className="mb-6 h-10 w-32 bg-gray-200 rounded"></div>
+            <Card className="mb-6">
+              <CardContent className="p-6">
+                <div className="flex gap-6">
+                  <div className="w-32 h-32 bg-gray-200 rounded-full"></div>
+                  <div className="flex-1 space-y-4">
+                    <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                    <div className="flex gap-2">
+                      <div className="h-10 bg-gray-200 rounded w-40"></div>
+                      <div className="h-10 bg-gray-200 rounded w-32"></div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
@@ -53,14 +78,14 @@ const TherapistDetail = () => {
         <Button
           variant="ghost"
           onClick={() => navigate('/encontrar-terapeutas')}
-          className="mb-6"
+          className="mb-6 hover-scale"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Voltar à Lista
         </Button>
 
         {/* Main Profile Card */}
-        <Card className="mb-6">
+        <Card className="mb-6 animate-fade-in">
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row gap-6">
               {/* Avatar and Basic Info */}
@@ -112,13 +137,16 @@ const TherapistDetail = () => {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <Button size="lg" className="flex-1">
+                  <Button size="lg" className="flex-1 hover-scale">
                     <Calendar className="h-4 w-4 mr-2" />
                     Agendar Consulta
                   </Button>
-                  <Button variant="outline" size="lg">
-                    <Heart className="h-4 w-4 mr-2" />
-                    Favoritar
+                  <Button variant="outline" size="lg" onClick={handleToggleFavorite} className="hover-scale">
+                    <Heart className={cn(
+                      "h-4 w-4 mr-2",
+                      isFavorite(therapist.id) ? "fill-red-500 text-red-500" : "text-gray-600"
+                    )} />
+                    {isFavorite(therapist.id) ? 'Favoritado' : 'Favoritar'}
                   </Button>
                 </div>
               </div>
@@ -130,7 +158,7 @@ const TherapistDetail = () => {
           {/* Main Content */}
           <div className="md:col-span-2 space-y-6">
             {/* Bio */}
-            <Card>
+            <Card className="animate-fade-in">
               <CardHeader>
                 <CardTitle>Sobre</CardTitle>
               </CardHeader>
@@ -140,14 +168,14 @@ const TherapistDetail = () => {
             </Card>
 
             {/* Specialties */}
-            <Card>
+            <Card className="animate-fade-in">
               <CardHeader>
                 <CardTitle>Especialidades</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {therapist.specialties.map((specialty) => (
-                    <Badge key={specialty.id} variant="secondary">
+                    <Badge key={specialty.id} variant="secondary" className="hover-scale">
                       {specialty.name}
                     </Badge>
                   ))}
@@ -156,14 +184,14 @@ const TherapistDetail = () => {
             </Card>
 
             {/* Approaches */}
-            <Card>
+            <Card className="animate-fade-in">
               <CardHeader>
                 <CardTitle>Abordagens Terapêuticas</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {therapist.approaches.map((approach) => (
-                    <Badge key={approach.id} variant="outline">
+                    <Badge key={approach.id} variant="outline" className="hover-scale">
                       {approach.name}
                     </Badge>
                   ))}
@@ -173,14 +201,14 @@ const TherapistDetail = () => {
 
             {/* Credentials */}
             {therapist.credentials.length > 0 && (
-              <Card>
+              <Card className="animate-fade-in">
                 <CardHeader>
                   <CardTitle>Credenciais</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     {therapist.credentials.map((credential) => (
-                      <div key={credential.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div key={credential.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover-scale">
                         <div>
                           <div className="font-medium">{credential.type} - {credential.number}</div>
                           <div className="text-sm text-gray-600">{credential.issuingBody}</div>
@@ -201,7 +229,7 @@ const TherapistDetail = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Session Types */}
-            <Card>
+            <Card className="animate-fade-in">
               <CardHeader>
                 <CardTitle>Modalidades de Atendimento</CardTitle>
               </CardHeader>
@@ -224,14 +252,14 @@ const TherapistDetail = () => {
             </Card>
 
             {/* Languages */}
-            <Card>
+            <Card className="animate-fade-in">
               <CardHeader>
                 <CardTitle>Idiomas</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {therapist.languages.map((language, index) => (
-                    <Badge key={index} variant="outline">
+                    <Badge key={index} variant="outline" className="hover-scale">
                       {language}
                     </Badge>
                   ))}
@@ -240,16 +268,16 @@ const TherapistDetail = () => {
             </Card>
 
             {/* Contact Actions */}
-            <Card>
+            <Card className="animate-fade-in">
               <CardHeader>
                 <CardTitle>Contato</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full hover-scale">
                     Enviar Mensagem
                   </Button>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full hover-scale">
                     Ver Disponibilidade
                   </Button>
                 </div>

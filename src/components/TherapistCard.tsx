@@ -1,10 +1,12 @@
 
-import { Star, MapPin, Clock, Video, Calendar } from 'lucide-react';
+import { Star, MapPin, Clock, Video, Calendar, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TherapistProfile } from '@/types/therapist';
 import { useNavigate } from 'react-router-dom';
+import { useFavorites } from '@/hooks/useFavorites';
+import { cn } from '@/lib/utils';
 
 interface TherapistCardProps {
   therapist: TherapistProfile;
@@ -12,13 +14,25 @@ interface TherapistCardProps {
 
 const TherapistCard = ({ therapist }: TherapistCardProps) => {
   const navigate = useNavigate();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const handleViewProfile = () => {
     navigate(`/terapeuta/${therapist.id}`);
   };
 
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleFavorite(therapist.id);
+  };
+
+  const handleSchedule = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // TODO: Implement scheduling functionality
+    navigate(`/terapeuta/${therapist.id}`);
+  };
+
   return (
-    <div className="therapist-card p-6">
+    <div className="therapist-card p-6 hover:shadow-md transition-shadow duration-200">
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
@@ -32,9 +46,26 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
         <div className="flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {therapist.name}
-              </h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-900 truncate">
+                  {therapist.name}
+                </h3>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleToggleFavorite}
+                  className="h-8 w-8"
+                >
+                  <Heart 
+                    className={cn(
+                      "h-4 w-4 transition-colors", 
+                      isFavorite(therapist.id) 
+                        ? "fill-red-500 text-red-500" 
+                        : "text-gray-400 hover:text-red-500"
+                    )} 
+                  />
+                </Button>
+              </div>
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <div className="flex items-center">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -95,7 +126,7 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
 
           {/* Actions */}
           <div className="flex flex-col sm:flex-row gap-2">
-            <Button className="flex-1 sm:flex-initial">
+            <Button className="flex-1 sm:flex-initial" onClick={handleSchedule}>
               <Calendar className="h-4 w-4 mr-2" />
               Agendar Consulta
             </Button>

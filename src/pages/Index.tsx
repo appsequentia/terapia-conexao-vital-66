@@ -23,16 +23,16 @@ const Index = () => {
       <section className="bg-gradient-to-br from-primary to-primary-600 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
               Encontre o terapeuta ideal<br />para você
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-primary-100">
+            <p className="text-xl md:text-2xl mb-8 text-primary-100 animate-fade-in">
               Conectamos você com profissionais qualificados para cuidar da sua saúde mental
             </p>
             
-            {/* Search Bar */}
-            <div className="max-w-4xl mx-auto">
-              <SearchBar />
+            {/* Search Bar - Now functional */}
+            <div className="max-w-4xl mx-auto animate-fade-in">
+              <SearchBar isHomePage={true} />
             </div>
           </div>
         </div>
@@ -51,7 +51,7 @@ const Index = () => {
           </div>
 
           <div className="grid md:grid-cols-4 gap-8">
-            <div className="text-center">
+            <div className="text-center hover-scale">
               <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="h-8 w-8 text-primary" />
               </div>
@@ -59,7 +59,7 @@ const Index = () => {
               <p className="text-gray-600">Todos os terapeutas são verificados e possuem credenciais válidas</p>
             </div>
 
-            <div className="text-center">
+            <div className="text-center hover-scale">
               <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
                 <Clock className="h-8 w-8 text-primary" />
               </div>
@@ -67,7 +67,7 @@ const Index = () => {
               <p className="text-gray-600">Agende sua consulta em poucos cliques, no horário que funciona para você</p>
             </div>
 
-            <div className="text-center">
+            <div className="text-center hover-scale">
               <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
                 <Heart className="h-8 w-8 text-primary" />
               </div>
@@ -75,7 +75,7 @@ const Index = () => {
               <p className="text-gray-600">Encontre o profissional que melhor se adequa às suas necessidades</p>
             </div>
 
-            <div className="text-center">
+            <div className="text-center hover-scale">
               <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
                 <Star className="h-8 w-8 text-primary" />
               </div>
@@ -100,23 +100,44 @@ const Index = () => {
 
           {isLoading ? (
             <div className="text-center py-8">
-              <p className="text-gray-600">Carregando terapeutas...</p>
+              <div className="animate-pulse">
+                <div className="grid gap-6 mb-8">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="bg-white rounded-lg p-6 shadow-sm">
+                      <div className="flex gap-4">
+                        <div className="w-20 h-20 bg-gray-200 rounded-full"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-full"></div>
+                          <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : error ? (
             <div className="text-center py-8">
-              <p className="text-red-600">Erro ao carregar terapeutas. Tente novamente mais tarde.</p>
+              <p className="text-red-600 mb-4">Erro ao carregar terapeutas. Tente novamente mais tarde.</p>
+              <Button onClick={() => window.location.reload()} variant="outline">
+                Tentar Novamente
+              </Button>
             </div>
           ) : (
             <div className="grid gap-6 mb-8">
               {therapists.slice(0, 3).map((therapist) => (
-                <TherapistCard key={therapist.id} therapist={therapist} />
+                <div key={therapist.id} className="animate-fade-in">
+                  <TherapistCard therapist={therapist} />
+                </div>
               ))}
             </div>
           )}
 
           <div className="text-center">
             <Link to="/encontrar-terapeutas">
-              <Button size="lg" className="bg-primary hover:bg-primary/90">
+              <Button size="lg" className="bg-primary hover:bg-primary/90 hover-scale">
                 Ver Todos os Terapeutas
               </Button>
             </Link>
@@ -135,12 +156,12 @@ const Index = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/encontrar-terapeutas">
-              <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-gray-100">
+              <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-gray-100 hover-scale">
                 Encontrar Terapeuta
               </Button>
             </Link>
             <Link to="/para-terapeutas">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary hover-scale">
                 Sou Terapeuta
               </Button>
             </Link>
@@ -161,25 +182,25 @@ const Index = () => {
             <div>
               <h3 className="font-semibold mb-4">Para Pacientes</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><Link to="/encontrar-terapeutas" className="hover:text-white">Encontrar Terapeuta</Link></li>
-                <li><a href="#" className="hover:text-white">Como Funciona</a></li>
-                <li><a href="#" className="hover:text-white">Preços</a></li>
+                <li><Link to="/encontrar-terapeutas" className="hover:text-white story-link">Encontrar Terapeuta</Link></li>
+                <li><Link to="/como-funciona" className="hover:text-white story-link">Como Funciona</Link></li>
+                <li><a href="#" className="hover:text-white story-link">Preços</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Para Terapeutas</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Cadastre-se</a></li>
-                <li><a href="#" className="hover:text-white">Como Funciona</a></li>
-                <li><a href="#" className="hover:text-white">Suporte</a></li>
+                <li><Link to="/para-terapeutas" className="hover:text-white story-link">Cadastre-se</Link></li>
+                <li><Link to="/para-terapeutas" className="hover:text-white story-link">Como Funciona</Link></li>
+                <li><a href="#" className="hover:text-white story-link">Suporte</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Suporte</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Central de Ajuda</a></li>
-                <li><a href="#" className="hover:text-white">Contato</a></li>
-                <li><a href="#" className="hover:text-white">Privacidade</a></li>
+                <li><a href="#" className="hover:text-white story-link">Central de Ajuda</a></li>
+                <li><a href="#" className="hover:text-white story-link">Contato</a></li>
+                <li><a href="#" className="hover:text-white story-link">Privacidade</a></li>
               </ul>
             </div>
           </div>

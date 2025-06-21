@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Header from '@/components/Header';
 import SearchBar from '@/components/SearchBar';
 import TherapistCard from '@/components/TherapistCard';
@@ -22,6 +23,7 @@ import {
 const THERAPISTS_PER_PAGE = 6;
 
 const FindTherapists = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { data: therapists = [], isLoading, error } = useTherapists();
   const [filteredTherapists, setFilteredTherapists] = useState<TherapistProfile[]>([]);
   const [filters, setFilters] = useState<SearchFilters>({
@@ -40,12 +42,21 @@ const FindTherapists = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
+  // Initialize search from URL parameters
+  useEffect(() => {
+    const queryParam = searchParams.get('q') || '';
+    const locationParam = searchParams.get('location') || '';
+    
+    setSearchQuery(queryParam);
+    setLocation(locationParam);
+  }, [searchParams]);
+
   // Use therapists data once loaded and apply initial filtering
-  React.useEffect(() => {
+  useEffect(() => {
     if (therapists.length > 0) {
       applyFilters(filters, searchQuery, location);
     }
-  }, [therapists]);
+  }, [therapists, searchQuery, location]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredTherapists.length / THERAPISTS_PER_PAGE);
@@ -56,6 +67,13 @@ const FindTherapists = () => {
   const handleSearch = (query: string, loc: string) => {
     setSearchQuery(query);
     setLocation(loc);
+    
+    // Update URL parameters
+    const params = new URLSearchParams();
+    if (query.trim()) params.set('q', query.trim());
+    if (loc.trim()) params.set('location', loc.trim());
+    setSearchParams(params);
+    
     applyFilters(filters, query, loc);
   };
 
@@ -161,6 +179,7 @@ const FindTherapists = () => {
     setFilters(clearedFilters);
     setSearchQuery('');
     setLocation('');
+    setSearchParams(new URLSearchParams());
     setFilteredTherapists(therapists);
     setCurrentPage(1);
   };
@@ -237,9 +256,23 @@ const FindTherapists = () => {
             {/* Results */}
             {isLoading ? (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">
-                  Carregando terapeutas...
-                </p>
+                <div className="animate-pulse">
+                  <div className="grid gap-6 mb-8">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className="bg-white rounded-lg p-6 shadow-sm">
+                        <div className="flex gap-4">
+                          <div className="w-20 h-20 bg-gray-200 rounded-full"></div>
+                          <div className="flex-1 space-y-2">
+                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                            <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-full"></div>
+                            <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : currentTherapists.length === 0 ? (
               <div className="text-center py-12">
@@ -258,10 +291,9 @@ const FindTherapists = () => {
                     : 'grid-cols-1'
                 }`}>
                   {currentTherapists.map((therapist) => (
-                    <TherapistCard 
-                      key={therapist.id} 
-                      therapist={therapist}
-                    />
+                    <div key={therapist.id} className="animate-fade-in">
+                      <TherapistCard therapist={therapist} />
+                    </div>
                   ))}
                 </div>
 

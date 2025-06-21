@@ -1,20 +1,38 @@
 
 import { useState } from 'react';
-import { Search, MapPin, Filter } from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
   onSearch?: (query: string, location: string) => void;
+  isHomePage?: boolean;
 }
 
-const SearchBar = ({ onSearch }: SearchBarProps) => {
+const SearchBar = ({ onSearch, isHomePage = false }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [location, setLocation] = useState('');
+  const navigate = useNavigate();
 
   const handleSearch = () => {
-    if (onSearch) {
-      onSearch(searchQuery, location);
+    if (isHomePage) {
+      // Navigate to FindTherapists page with search parameters
+      const params = new URLSearchParams();
+      if (searchQuery.trim()) {
+        params.set('q', searchQuery.trim());
+      }
+      if (location.trim()) {
+        params.set('location', location.trim());
+      }
+      
+      const queryString = params.toString();
+      navigate(`/encontrar-terapeutas${queryString ? `?${queryString}` : ''}`);
+    } else {
+      // Call the onSearch callback for the FindTherapists page
+      if (onSearch) {
+        onSearch(searchQuery, location);
+      }
     }
   };
 
