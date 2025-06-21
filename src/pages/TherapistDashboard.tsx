@@ -2,24 +2,45 @@ import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, DollarSign, MessageCircle } from 'lucide-react';
+import { Calendar, Users, DollarSign, MessageCircle, LogOut } from 'lucide-react';
 import { getPersonalizedGreeting } from '@/utils/greetingUtils';
 
 const TherapistDashboard = () => {
-  const { profile } = useAuth();
+  const { profile, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      console.log('Dashboard - Logging out...');
+      await logout();
+    } catch (error) {
+      console.error('Dashboard - Erro ao fazer logout:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {getPersonalizedGreeting(profile?.nome || '', profile?.genero)}
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Gerencie seus pacientes, sessões e perfil profissional.
-          </p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {getPersonalizedGreeting(profile?.nome || '', profile?.genero)}
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Gerencie seus pacientes, sessões e perfil profissional.
+            </p>
+          </div>
+          
+          {/* Botão de Logout Visível */}
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-gray-700 hover:text-red-600 hover:border-red-300 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="hidden sm:inline">Sair</span>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
