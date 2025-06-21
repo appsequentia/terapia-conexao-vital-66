@@ -22,6 +22,8 @@ export interface SupabaseTherapist {
 }
 
 export function mapSupabaseToTherapist(supabaseTherapist: SupabaseTherapist): import('./therapist').TherapistProfile {
+  console.log('Mapping Supabase therapist:', supabaseTherapist);
+  
   return {
     id: supabaseTherapist.id,
     name: supabaseTherapist.nome,
@@ -38,12 +40,12 @@ export function mapSupabaseToTherapist(supabaseTherapist: SupabaseTherapist): im
       name: abr,
       abbreviation: abr.split(' ').map(word => word[0]).join('').toUpperCase()
     })),
-    rating: supabaseTherapist.rating,
-    reviewCount: supabaseTherapist.review_count,
+    rating: supabaseTherapist.rating || 0,
+    reviewCount: supabaseTherapist.review_count || 0,
     pricePerSession: supabaseTherapist.price_per_session || 0,
     isOnline: supabaseTherapist.is_online,
-    languages: supabaseTherapist.languages,
-    experience: supabaseTherapist.experience,
+    languages: supabaseTherapist.languages || ['Português'],
+    experience: supabaseTherapist.experience || 0,
     credentials: [], // Empty for now, could be expanded later
     availability: [], // Empty for now, could be expanded later
     location: {

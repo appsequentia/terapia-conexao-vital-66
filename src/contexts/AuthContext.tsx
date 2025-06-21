@@ -55,8 +55,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const location = useLocation();
   const { toast } = useToast();
 
-  // Computed property for backward compatibility
-  const isAuthenticated = !!user && !!session;
+  // Fix: Computed property for backward compatibility - correctly calculate authentication status
+  const isAuthenticated = Boolean(user && session && profile);
+
+  console.log('AuthContext - Current state:', {
+    hasUser: !!user,
+    hasSession: !!session,
+    hasProfile: !!profile,
+    isAuthenticated,
+    isLoading
+  });
 
   // Helper function to check if user is in registration flow
   const isInRegistrationFlow = () => {
@@ -124,19 +132,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     const initializeAuth = async () => {
       try {
+        console.log('AuthContext - Initializing auth...');
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         
         if (mounted) {
+          console.log('AuthContext - Initial session:', !!initialSession);
           setSession(initialSession);
           setUser(initialSession?.user ?? null);
 
           if (initialSession?.user) {
+            console.log('AuthContext - Fetching profile for user:', initialSession.user.id);
             const userProfile = await fetchProfile(initialSession.user.id);
             if (mounted) {
+              console.log('AuthContext - Profile fetched:', !!userProfile);
               setProfile(userProfile);
               if (userProfile) {
                 await handleUserRedirect(initialSession.user, userProfile);
               }
+            }
+          } else {
+            if (mounted) {
+              setProfile(null);
             }
           }
         }
@@ -144,6 +160,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         console.error('Error initializing auth:', error);
       } finally {
         if (mounted) {
+          console.log('AuthContext - Setting isLoading to false');
           setIsLoading(false);
         }
       }
@@ -172,6 +189,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           if (mounted) {
             setProfile(null);
           }
+        }
+
+        // Ensure loading state is updated
+        if (mounted) {
+          setIsLoading(false);
         }
       }
     );
