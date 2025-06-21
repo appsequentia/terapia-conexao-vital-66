@@ -1,399 +1,240 @@
-import Header from '@/components/Header';
+
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle, Users, Calendar, DollarSign, Star, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { 
-  Users, 
-  TrendingUp, 
-  Briefcase, 
-  Shield, 
-  Clock, 
-  CreditCard, 
-  CheckCircle, 
-  Star,
-  FileCheck,
-  Settings,
-  HelpCircle
-} from 'lucide-react';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Header from '@/components/Header';
 
 const ParaTerapeutas = () => {
-  const benefits = [
-    {
-      icon: Users,
-      title: "Mais Pacientes",
-      description: "Acesse uma base crescente de pacientes que procuram atendimento psicológico de qualidade."
-    },
-    {
-      icon: Clock,
-      title: "Agenda Flexível",
-      description: "Gerencie seus horários com total autonomia, definindo disponibilidade e modalidades de atendimento."
-    },
-    {
-      icon: CreditCard,
-      title: "Pagamentos Seguros",
-      description: "Receba seus pagamentos de forma automática e segura, sem se preocupar com cobranças."
-    },
-    {
-      icon: TrendingUp,
-      title: "Cresça Profissionalmente",
-      description: "Expanda sua prática e desenvolva sua carreira com ferramentas profissionais de gestão."
-    }
-  ];
-
-  const steps = [
-    {
-      icon: FileCheck,
-      title: "1. Cadastro",
-      description: "Crie sua conta e envie sua documentação profissional (CRP, diplomas, certificados)."
-    },
-    {
-      icon: Shield,
-      title: "2. Verificação",
-      description: "Nossa equipe analisa e valida suas credenciais profissionais em até 48 horas."
-    },
-    {
-      icon: Settings,
-      title: "3. Configuração",
-      description: "Personalize seu perfil, defina especialidades, valores e configure sua agenda."
-    },
-    {
-      icon: Briefcase,
-      title: "4. Comece a Atender",
-      description: "Receba solicitações de pacientes e comece a expandir sua prática profissional."
-    }
-  ];
-
-  const requirements = [
-    "Formação em Psicologia, Terapias Integrativas ou áreas relacionadas",
-    "Certificações válidas na sua área de atuação terapêutica",
-    "Experiência mínima de 6 meses em atendimento terapêutico",
-    "Documentação profissional apropriada (CRP, certificados, diplomas)",
-    "Disponibilidade para atendimentos online ou presenciais"
-  ];
-
-  const testimonials = [
-    {
-      name: "Dra. Maria Silva",
-      specialty: "Psicologia Clínica",
-      text: "A Sequentia me permitiu alcançar mais pacientes e organizar melhor minha agenda. O suporte é excelente!",
-      rating: 5
-    },
-    {
-      name: "Dr. João Santos",
-      specialty: "Terapia Cognitiva",
-      text: "Plataforma intuitiva e pagamentos pontuais. Recomendo para todos os colegas da área.",
-      rating: 5
-    },
-    {
-      name: "Dra. Ana Costa",
-      specialty: "Psicoterapia",
-      text: "Triplicou meu número de pacientes em apenas 3 meses. Ferramenta indispensável!",
-      rating: 5
-    }
-  ];
-
-  const faqs = [
-    {
-      question: "Qual é o valor da mensalidade e taxas?",
-      answer: "Cobramos R$ 36,90 por mês para acesso completo à plataforma e 3% sobre o valor de cada consulta realizada."
-    },
-    {
-      question: "Como funciona o processo de verificação?",
-      answer: "Analisamos seus documentos profissionais (certificados, diplomas, registros) e validamos sua experiência. O processo leva até 48 horas."
-    },
-    {
-      question: "Quando recebo os pagamentos?",
-      answer: "Os pagamentos são liberados semanalmente, sempre às terças-feiras, via PIX ou transferência bancária."
-    },
-    {
-      question: "Posso definir meus próprios preços?",
-      answer: "Sim! Você tem total autonomia para definir os valores de suas consultas, respeitando o mercado local."
-    },
-    {
-      question: "É obrigatório atender online?",
-      answer: "Não. Você pode escolher entre atendimento online, presencial ou ambos, conforme sua preferência."
-    },
-    {
-      question: "Preciso ter registro no CRP?",
-      answer: "Não necessariamente. Aceitamos psicólogos com CRP e também terapeutas integrativos com certificações válidas em suas áreas de atuação."
-    },
-    {
-      question: "Há suporte técnico disponível?",
-      answer: "Sim! Nossa equipe oferece suporte técnico completo via chat, email e telefone durante o horário comercial."
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary to-primary-600 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Expanda sua Prática Profissional
-          </h1>
-          <p className="text-xl md:text-2xl text-primary-100 max-w-3xl mx-auto mb-8">
-            Conecte-se com mais pacientes e faça crescer sua carreira como terapeuta através da nossa plataforma
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/cadastro">
-              <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-gray-100">
-                Começar Agora
-              </Button>
-            </Link>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
-              Saiba Mais
+      <div className="bg-gradient-to-r from-primary to-primary/80 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              Conecte-se com mais pacientes
+            </h1>
+            <p className="text-xl md:text-2xl mb-8 text-primary-foreground/90">
+              Expanda sua prática terapêutica na maior plataforma de saúde mental do Brasil
+            </p>
+            <Button 
+              size="lg" 
+              variant="secondary" 
+              className="text-primary hover:text-primary/90"
+              asChild
+            >
+              <Link to="/cadastro">
+                Cadastre-se Gratuitamente
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
             </Button>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Benefícios Section */}
-      <section className="py-16 bg-white">
+      {/* Benefits Section */}
+      <div className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Por que escolher a Sequentia?
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Uma plataforma completa para profissionais que querem expandir sua prática
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Oferecemos as ferramentas e o suporte necessários para você expandir sua prática
+              e impactar mais vidas de forma significativa.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((benefit, index) => {
-              const IconComponent = benefit.icon;
-              return (
-                <div key={index} className="text-center">
-                  <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
-                    <IconComponent className="h-8 w-8 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold mb-3">{benefit.title}</h3>
-                  <p className="text-gray-600">{benefit.description}</p>
-                </div>
-              );
-            })}
+            <Card className="text-center">
+              <CardHeader>
+                <Users className="h-12 w-12 text-primary mx-auto mb-4" />
+                <CardTitle>Mais Pacientes</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Conecte-se com pessoas que precisam da sua ajuda através da nossa plataforma
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <Calendar className="h-12 w-12 text-primary mx-auto mb-4" />
+                <CardTitle>Gestão Simplificada</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Sistema integrado de agendamento, prontuários e gestão financeira
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <DollarSign className="h-12 w-12 text-primary mx-auto mb-4" />
+                <CardTitle>Renda Extra</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Defina seus próprios valores e horários. Tenha controle total da sua agenda
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <Star className="h-12 w-12 text-primary mx-auto mb-4" />
+                <CardTitle>Reputação Online</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Construa sua reputação com avaliações e depoimentos de pacientes satisfeitos
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Como Funciona Section */}
-      <section className="py-16 bg-gray-50">
+      {/* Features Section */}
+      <div className="bg-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Como Funciona para Terapeutas
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Recursos exclusivos para terapeutas
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Processo simples e rápido para começar a atender pacientes
-            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((step, index) => {
-              const IconComponent = step.icon;
-              return (
-                <div key={index} className="text-center">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <IconComponent className="h-8 w-8 text-primary" />
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                Tudo que você precisa em um só lugar
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-1 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Perfil Profissional Completo</h4>
+                    <p className="text-gray-600">Mostre suas especialidades, formação e experiência</p>
                   </div>
-                  <h3 className="text-lg font-semibold mb-3">{step.title}</h3>
-                  <p className="text-gray-600">{step.description}</p>
                 </div>
-              );
-            })}
+                <div className="flex items-start">
+                  <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-1 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Agendamento Online</h4>
+                    <p className="text-gray-600">Sistema automatizado de marcação de consultas</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-1 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Prontuário Digital</h4>
+                    <p className="text-gray-600">Mantenha o histórico dos seus pacientes organizado</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <CheckCircle className="h-6 w-6 text-green-500 mr-3 mt-1 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Teleconsulta Integrada</h4>
+                    <p className="text-gray-600">Atenda seus pacientes online com qualidade</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gray-100 rounded-lg h-96 flex items-center justify-center">
+              <p className="text-gray-500">Dashboard Preview</p>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Requisitos Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Requisitos para Cadastro
-            </h2>
-            <p className="text-lg text-gray-600">
-              Verifique se você atende aos requisitos para se tornar um terapeuta parceiro
-            </p>
-          </div>
-
-          <Card className="border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <CheckCircle className="h-6 w-6 text-primary mr-2" />
-                Documentação Necessária
-              </CardTitle>
-              <CardDescription>
-                Aceitamos diversos profissionais da área terapêutica:
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3">
-                {requirements.map((requirement, index) => (
-                  <li key={index} className="flex items-start">
-                    <CheckCircle className="h-5 w-5 text-primary mr-3 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">{requirement}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Depoimentos Section */}
-      <section className="py-16 bg-gray-50">
+      {/* Testimonials */}
+      <div className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               O que nossos terapeutas dizem
             </h2>
-            <p className="text-lg text-gray-600">
-              Histórias reais de profissionais que transformaram suas práticas
-            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="bg-white">
-                <CardContent className="p-6">
-                  <div className="flex items-center mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
-                    ))}
-                  </div>
-                  <p className="text-gray-600 mb-4 italic">"{testimonial.text}"</p>
-                  <div>
-                    <p className="font-semibold text-gray-900">{testimonial.name}</p>
-                    <p className="text-sm text-gray-500">{testimonial.specialty}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Valores Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
-            Valores Transparentes
-          </h2>
-          
-          <div className="grid md:grid-cols-2 gap-8 mb-8">
-            <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-accent/20">
-              <CardContent className="p-8">
-                <div className="text-4xl font-bold text-primary mb-4">R$ 36,90</div>
-                <p className="text-xl text-gray-700 mb-4">
-                  Mensalidade para acesso completo
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-600 mb-4">
+                  "A plataforma me permitiu organizar melhor minha prática e alcançar mais pacientes. 
+                  O sistema de agendamento é excelente!"
                 </p>
-                <ul className="text-left space-y-2 text-gray-600">
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                    Acesso total à plataforma
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                    Gestão de agenda
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                    Suporte técnico incluído
-                  </li>
-                </ul>
+                <div className="font-semibold text-gray-900">Ana Silva</div>
+                <div className="text-sm text-gray-500">Psicóloga Clínica</div>
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-accent/20">
-              <CardContent className="p-8">
-                <div className="text-4xl font-bold text-primary mb-4">3%</div>
-                <p className="text-xl text-gray-700 mb-4">
-                  Taxa sobre consultas realizadas
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-600 mb-4">
+                  "Consegui dobrar minha base de pacientes em 6 meses. A qualidade dos recursos 
+                  disponíveis é impressionante."
                 </p>
-                <ul className="text-left space-y-2 text-gray-600">
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                    Taxa muito competitiva
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                    Pagamentos semanais
-                  </li>
-                  <li className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-primary mr-2" />
-                    Processamento automático
-                  </li>
-                </ul>
+                <div className="font-semibold text-gray-900">Carlos Mendes</div>
+                <div className="text-sm text-gray-500">Terapeuta Familiar</div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-600 mb-4">
+                  "O suporte técnico é excepcional e a plataforma é muito intuitiva. 
+                  Recomendo para qualquer colega terapeuta."
+                </p>
+                <div className="font-semibold text-gray-900">Maria Santos</div>
+                <div className="text-sm text-gray-500">Psicanalista</div>
               </CardContent>
             </Card>
           </div>
-
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Modelo de preços justo e transparente, ideal para profissionais que querem crescer sem grandes investimentos iniciais.
-          </p>
         </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Perguntas Frequentes
-            </h2>
-            <p className="text-lg text-gray-600">
-              Tire suas dúvidas sobre como funciona para terapeutas
-            </p>
-          </div>
-
-          <Accordion type="single" collapsible className="space-y-4">
-            {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`} className="bg-white rounded-lg border border-gray-200">
-                <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                  <div className="flex items-center text-left">
-                    <HelpCircle className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
-                    <span className="font-medium">{faq.question}</span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-6 pb-4 text-gray-600">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-      </section>
+      </div>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary text-white">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+      <div className="bg-primary text-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Pronto para expandir sua prática?
           </h2>
-          <p className="text-xl mb-8 text-primary-100">
-            Junte-se a centenas de terapeutas que já transformaram suas carreiras conosco
+          <p className="text-xl mb-8 text-primary-foreground/90">
+            Junte-se a centenas de terapeutas que já transformaram sua carreira conosco
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button 
+            size="lg" 
+            variant="secondary" 
+            className="text-primary hover:text-primary/90"
+            asChild
+          >
             <Link to="/cadastro">
-              <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-gray-100">
-                Cadastrar-se Agora
-              </Button>
+              Começar Agora - É Grátis
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Link>
-            <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
-              Falar com Consultor
-            </Button>
-          </div>
+          </Button>
         </div>
-      </section>
+      </div>
     </div>
   );
 };
