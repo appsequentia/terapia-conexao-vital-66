@@ -20,7 +20,20 @@ const TherapistDashboard = () => {
   };
 
   const handleEditProfile = () => {
-    navigate('/editar-perfil-terapeuta');
+    console.log('TherapistDashboard - Edit profile button clicked');
+    console.log('TherapistDashboard - Current profile:', {
+      hasProfile: !!profile,
+      userType: profile?.tipo_usuario,
+      profileId: profile?.id
+    });
+    
+    try {
+      console.log('TherapistDashboard - Navigating to /editar-perfil-terapeuta');
+      navigate('/editar-perfil-terapeuta');
+      console.log('TherapistDashboard - Navigation completed');
+    } catch (error) {
+      console.error('TherapistDashboard - Navigation error:', error);
+    }
   };
 
   return (

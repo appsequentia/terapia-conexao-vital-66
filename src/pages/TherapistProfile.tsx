@@ -17,7 +17,7 @@ import { useTherapistProfile } from '@/hooks/useTherapistProfile';
 import { useTherapistData } from '@/hooks/useTherapistData';
 import ImageUpload from '@/components/ImageUpload';
 import FormationInput, { Formation } from '@/components/FormationInput';
-import { X } from 'lucide-react';
+import { X, ArrowLeft } from 'lucide-react';
 
 const abordagensOptions = [
   'Terapia Cognitivo-Comportamental (TCC)',
@@ -95,6 +95,15 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  console.log('TherapistProfile - Component mounted:', {
+    isFirstTimeSetup,
+    hasUser: !!user,
+    hasProfile: !!profile,
+    userType: profile?.tipo_usuario,
+    authLoading,
+    dataLoading
+  });
+
   const {
     register,
     handleSubmit,
@@ -115,11 +124,6 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
       crpNumero: '',
     },
   });
-
-  const watchPrice = watch('pricePerSession');
-  const watchOffersOnline = watch('offersOnline');
-  const watchOffersInPerson = watch('offersInPerson');
-  const watchHasProfessionalRegistry = watch('hasProfessionalRegistry');
 
   // Helper function to safely parse formacao from Supabase
   const parseFormacao = (formacao: any): Formation[] => {
@@ -172,12 +176,21 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
 
   // Verificar se o usuário está autenticado e é terapeuta
   useEffect(() => {
+    console.log('TherapistProfile - Auth check:', {
+      authLoading,
+      hasUser: !!user,
+      hasProfile: !!profile,
+      userType: profile?.tipo_usuario
+    });
+
     if (!authLoading && (!user || !profile)) {
+      console.log('TherapistProfile - No user or profile, redirecting to login');
       navigate('/login');
       return;
     }
 
     if (!authLoading && profile && profile.tipo_usuario !== 'therapist') {
+      console.log('TherapistProfile - User is not a therapist, redirecting to home');
       toast({
         title: 'Acesso negado',
         description: 'Esta página é apenas para terapeutas.',
@@ -186,7 +199,15 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
       navigate('/');
       return;
     }
+
+    console.log('TherapistProfile - Auth check passed, user can access this page');
   }, [user, profile, authLoading, navigate, toast]);
+
+  // Função para voltar ao dashboard
+  const handleBackToDashboard = () => {
+    console.log('TherapistProfile - Going back to dashboard');
+    navigate('/dashboard-terapeuta');
+  };
 
   // Adicionar especialidade
   const addEspecialidade = (especialidade: string) => {
@@ -206,6 +227,8 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
 
   const onSubmit = async (data: TherapistProfileFormData) => {
     if (!user || !profile) return;
+
+    console.log('TherapistProfile - Submitting profile data');
 
     try {
       await saveProfile({
@@ -235,7 +258,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
           : 'Suas alterações foram salvas com sucesso.',
       });
 
-      // Sempre redirecionar para o dashboard após salvar
+      console.log('TherapistProfile - Profile saved successfully, redirecting to dashboard');
       navigate('/dashboard-terapeuta');
     } catch (error) {
       console.error('Error saving profile:', error);
@@ -248,6 +271,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
   };
 
   if (authLoading || (!isFirstTimeSetup && dataLoading)) {
+    console.log('TherapistProfile - Showing loading state');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -259,13 +283,27 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
   }
 
   if (!user || !profile) {
+    console.log('TherapistProfile - No user or profile, returning null');
     return null;
   }
+
+  console.log('TherapistProfile - Rendering form');
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
+          {!isFirstTimeSetup && (
+            <Button
+              variant="ghost"
+              onClick={handleBackToDashboard}
+              className="mb-4 flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar ao Dashboard
+            </Button>
+          )}
+          
           <h1 className="text-3xl font-bold text-gray-900">
             {isFirstTimeSetup ? 'Complete seu Perfil Profissional' : 'Editar Perfil Profissional'}
           </h1>
