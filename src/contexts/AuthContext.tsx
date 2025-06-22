@@ -56,8 +56,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const location = useLocation();
   const { toast } = useToast();
 
-  // Fixed: Correctly calculate authentication status - must have ALL three components
-  const isAuthenticated = !!(user && session && profile);
+  // Simplified authentication check - user must have valid session AND user object
+  const isAuthenticated = Boolean(session && user);
 
   console.log('AuthContext - Current state:', {
     hasUser: !!user,
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isAuthenticated,
     isLoading,
     userEmail: user?.email,
-    sessionValid: session?.expires_at ? new Date(session.expires_at * 1000) > new Date() : false
+    currentPath: location.pathname
   });
 
   // Helper function to check if user is in registration flow
@@ -78,6 +78,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const handleUserRedirect = async (user: User, profile: Profile) => {
     // Don't redirect if user is already in registration flow
     if (isInRegistrationFlow()) {
+      console.log('AuthContext - User in registration flow, skipping redirect');
       return;
     }
 
@@ -91,21 +92,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           .maybeSingle();
 
         if (!therapistData) {
-          // Therapist hasn't completed their profile
+          console.log('AuthContext - Therapist profile incomplete, redirecting to setup');
           navigate('/completar-cadastro-terapeuta');
           return;
         }
       } catch (error) {
-        console.error('Error checking therapist profile:', error);
+        console.error('AuthContext - Error checking therapist profile:', error);
       }
     }
 
-    // Redirect to appropriate dashboard
+    // Redirect to appropriate dashboard only if not already there
     const dashboardPath = profile.tipo_usuario === 'therapist' 
       ? '/dashboard-terapeuta' 
       : '/dashboard-cliente';
     
     if (location.pathname !== dashboardPath) {
+      console.log('AuthContext - Redirecting to dashboard:', dashboardPath);
       navigate(dashboardPath);
     }
   };
@@ -120,14 +122,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .single();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('AuthContext - Error fetching profile:', error);
         return null;
       }
 
       console.log('AuthContext - Profile fetched successfully:', data);
       return data as Profile;
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('AuthContext - Error fetching profile:', error);
       return null;
     }
   };
@@ -146,30 +148,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             console.log('AuthContext - Auth state changed:', event, {
               hasSession: !!session,
-              userId: session?.user?.id,
-              expiresAt: session?.expires_at
+              userId: session?.user?.id
             });
             
+            // Always update session and user state immediately
             setSession(session);
             setUser(session?.user ?? null);
 
             if (session?.user) {
-              const userProfile = await fetchProfile(session.user.id);
-              if (mounted) {
-                setProfile(userProfile);
-                if (userProfile) {
-                  await handleUserRedirect(session.user, userProfile);
+              console.log('AuthContext - User authenticated, fetching profile...');
+              // Defer profile fetching to avoid blocking UI
+              setTimeout(async () => {
+                if (!mounted) return;
+                const userProfile = await fetchProfile(session.user.id);
+                if (mounted) {
+                  setProfile(userProfile);
+                  if (userProfile) {
+                    await handleUserRedirect(session.user, userProfile);
+                  }
                 }
-              }
+              }, 0);
             } else {
+              console.log('AuthContext - No user session, clearing profile');
               if (mounted) {
                 setProfile(null);
               }
-            }
-
-            // Ensure loading state is updated
-            if (mounted) {
-              setIsLoading(false);
             }
           }
         );
@@ -187,31 +190,33 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setUser(initialSession?.user ?? null);
 
           if (initialSession?.user) {
-            console.log('AuthContext - Fetching profile for initial session user:', initialSession.user.id);
-            const userProfile = await fetchProfile(initialSession.user.id);
-            if (mounted) {
-              console.log('AuthContext - Initial profile fetched:', !!userProfile);
-              setProfile(userProfile);
-              if (userProfile) {
-                await handleUserRedirect(initialSession.user, userProfile);
+            console.log('AuthContext - Fetching profile for initial session...');
+            // Defer profile fetching for initial session too
+            setTimeout(async () => {
+              if (!mounted) return;
+              const userProfile = await fetchProfile(initialSession.user.id);
+              if (mounted) {
+                setProfile(userProfile);
+                if (userProfile) {
+                  await handleUserRedirect(initialSession.user, userProfile);
+                }
               }
-            }
-          } else {
-            if (mounted) {
-              setProfile(null);
-            }
+            }, 0);
           }
         }
 
-        // Clean up subscription
+        // Set loading to false after initial setup
+        if (mounted) {
+          console.log('AuthContext - Auth initialization complete');
+          setIsLoading(false);
+        }
+
         return () => {
           subscription.unsubscribe();
         };
       } catch (error) {
-        console.error('Error initializing auth:', error);
-      } finally {
+        console.error('AuthContext - Error initializing auth:', error);
         if (mounted) {
-          console.log('AuthContext - Setting isLoading to false');
           setIsLoading(false);
         }
       }
@@ -227,6 +232,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('AuthContext - Attempting login for:', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -234,18 +240,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
       if (error) throw error;
 
+      console.log('AuthContext - Login successful');
       toast({
         title: 'Login realizado com sucesso!',
         description: 'Bem-vindo de volta.',
       });
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('AuthContext - Login error:', error);
       throw error;
     }
   };
 
   const register = async ({ name, email, password, type }: RegisterData) => {
     try {
+      console.log('AuthContext - Attempting registration for:', email);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -266,19 +274,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         });
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error('AuthContext - Registration error:', error);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
+      console.log('AuthContext - Attempting logout...');
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
 
+      // Clear all state immediately
       setUser(null);
       setProfile(null);
       setSession(null);
+      
+      console.log('AuthContext - Logout successful, redirecting to home');
       navigate('/');
 
       toast({
@@ -286,7 +298,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         description: 'Até logo!',
       });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('AuthContext - Logout error:', error);
       throw error;
     }
   };
@@ -304,7 +316,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         description: 'Verifique sua caixa de entrada para redefinir sua senha.',
       });
     } catch (error) {
-      console.error('Reset password error:', error);
+      console.error('AuthContext - Reset password error:', error);
       throw error;
     }
   };

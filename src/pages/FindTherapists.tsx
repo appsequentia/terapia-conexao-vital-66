@@ -115,14 +115,14 @@ const FindTherapists = () => {
         const nameMatch = therapist.name?.toLowerCase().includes(query.toLowerCase());
         const bioMatch = therapist.bio?.toLowerCase().includes(query.toLowerCase());
         
-        // Handle specialties array properly
-        const specialtyMatch = therapist.specialties?.some(spec => 
-          spec.name?.toLowerCase().includes(query.toLowerCase())
+        // Handle specialties array properly - defensive programming
+        const specialtyMatch = Array.isArray(therapist.specialties) && therapist.specialties.some(spec => 
+          spec && spec.name && spec.name.toLowerCase().includes(query.toLowerCase())
         );
         
-        // Handle approaches array properly
-        const approachMatch = therapist.approaches?.some(app => 
-          app.name?.toLowerCase().includes(query.toLowerCase())
+        // Handle approaches array properly - defensive programming
+        const approachMatch = Array.isArray(therapist.approaches) && therapist.approaches.some(app => 
+          app && app.name && app.name.toLowerCase().includes(query.toLowerCase())
         );
 
         return nameMatch || bioMatch || specialtyMatch || approachMatch;
@@ -140,14 +140,18 @@ const FindTherapists = () => {
     // Specialties filter - fix to work with new structure
     if (currentFilters.specialties.length > 0) {
       filtered = filtered.filter(therapist =>
-        therapist.specialties?.some(spec => currentFilters.specialties.includes(spec.id))
+        Array.isArray(therapist.specialties) && therapist.specialties.some(spec => 
+          spec && currentFilters.specialties.includes(spec.id)
+        )
       );
     }
 
     // Approaches filter - fix to work with new structure
     if (currentFilters.approaches.length > 0) {
       filtered = filtered.filter(therapist =>
-        therapist.approaches?.some(app => currentFilters.approaches.includes(app.id))
+        Array.isArray(therapist.approaches) && therapist.approaches.some(app => 
+          app && currentFilters.approaches.includes(app.id)
+        )
       );
     }
 
@@ -178,7 +182,7 @@ const FindTherapists = () => {
     // Languages filter
     if (currentFilters.languages.length > 0) {
       filtered = filtered.filter(therapist =>
-        currentFilters.languages.some(lang => therapist.languages?.includes(lang))
+        Array.isArray(therapist.languages) && currentFilters.languages.some(lang => therapist.languages.includes(lang))
       );
     }
 
@@ -322,7 +326,7 @@ const FindTherapists = () => {
               <div className="text-center py-12">
                 <p className="text-gray-500 text-lg mb-4">
                   {filteredTherapists.length === 0 && therapists.length === 0 
-                    ? 'Nenhum terapeusta cadastrado ainda.' 
+                    ? 'Nenhum terapeuta cadastrado ainda.' 
                     : 'Nenhum terapeuta encontrado com os filtros aplicados.'
                   }
                 </p>

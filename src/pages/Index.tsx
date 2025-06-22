@@ -11,8 +11,15 @@ import { Heart, Shield, Clock, Star } from 'lucide-react';
 const Index = () => {
   const { data: therapists = [], isLoading, error } = useTherapists();
 
+  console.log('Index - Component state:', {
+    therapistsCount: therapists.length,
+    isLoading,
+    hasError: !!error,
+    firstTherapist: therapists[0]?.name || null
+  });
+
   if (error) {
-    console.error('Error loading therapists:', error);
+    console.error('Index - Error loading therapists:', error);
   }
 
   return (
@@ -30,7 +37,7 @@ const Index = () => {
               Conectamos você com profissionais qualificados para cuidar da sua saúde mental
             </p>
             
-            {/* Search Bar - Now functional */}
+            {/* Search Bar - Always visible as public feature */}
             <div className="max-w-4xl mx-auto animate-fade-in">
               <SearchBar isHomePage={true} />
             </div>
@@ -86,7 +93,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Therapists Section */}
+      {/* Therapists Section - Always show, independent of auth status */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -124,6 +131,15 @@ const Index = () => {
               <Button onClick={() => window.location.reload()} variant="outline">
                 Tentar Novamente
               </Button>
+            </div>
+          ) : therapists.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600 mb-4">Nenhum terapeuta cadastrado ainda.</p>
+              <Link to="/para-terapeutas">
+                <Button variant="outline">
+                  Seja um Terapeuta
+                </Button>
+              </Link>
             </div>
           ) : (
             <div className="grid gap-6 mb-8">

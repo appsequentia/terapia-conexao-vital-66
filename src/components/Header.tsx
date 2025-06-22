@@ -16,7 +16,12 @@ const Header = () => {
   } = useAuth();
   const navigate = useNavigate();
   
-  console.log('Header render - isAuthenticated:', isAuthenticated, 'isLoading:', isLoading, 'hasProfile:', !!profile);
+  console.log('Header render - Auth state:', {
+    isAuthenticated, 
+    isLoading, 
+    hasProfile: !!profile,
+    profileType: profile?.tipo_usuario
+  });
 
   const handleLogout = async () => {
     try {
@@ -65,7 +70,7 @@ const Header = () => {
             </Link>
           </nav>
 
-          {/* Auth Section */}
+          {/* Auth Section - Always render public buttons when not authenticated */}
           <div className="flex items-center space-x-4">
             {isLoading ? (
               <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
@@ -110,6 +115,7 @@ const Header = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
+              /* Always show public buttons when not authenticated - no additional conditions */
               <div className="flex items-center space-x-4">
                 <Button variant="ghost" onClick={handleLogin} className="text-gray-700 hover:text-primary">
                   Entrar
