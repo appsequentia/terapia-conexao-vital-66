@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -124,6 +125,12 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
       crpNumero: '',
     },
   });
+
+  // Watch form values
+  const watchHasProfessionalRegistry = watch('hasProfessionalRegistry');
+  const watchOffersOnline = watch('offersOnline');
+  const watchOffersInPerson = watch('offersInPerson');
+  const watchPrice = watch('pricePerSession');
 
   // Helper function to safely parse formacao from Supabase
   const parseFormacao = (formacao: any): Formation[] => {
@@ -532,7 +539,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
                     className="mt-1"
                     {...register('pricePerSession', { valueAsNumber: true })}
                   />
-                  {watchPrice &&  (
+                  {watchPrice && (
                     <p className="mt-1 text-sm text-gray-600">
                       Valor formatado: R$ {watchPrice.toFixed(2).replace('.', ',')}
                     </p>
