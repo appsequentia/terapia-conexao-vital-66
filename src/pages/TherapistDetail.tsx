@@ -9,6 +9,7 @@ import Header from '@/components/Header';
 import { useTherapistDetail } from '@/hooks/useTherapistDetail';
 import { useFavorites } from '@/hooks/useFavorites';
 import { cn } from '@/lib/utils';
+import { AvailabilityCalendar } from '@/components/therapist/AvailabilityCalendar';
 
 const TherapistDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -224,6 +225,16 @@ const TherapistDetail = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Availability */}
+            <Card className="animate-fade-in">
+              <CardHeader>
+                <CardTitle>Disponibilidade</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AvailabilityCalendar />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Sidebar */}
@@ -276,9 +287,6 @@ const TherapistDetail = () => {
                 <div className="space-y-3">
                   <Button variant="outline" className="w-full hover-scale">
                     Enviar Mensagem
-                  </Button>
-                  <Button variant="outline" className="w-full hover-scale">
-                    Ver Disponibilidade
                   </Button>
                 </div>
               </CardContent>
