@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
@@ -150,7 +149,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
   // Carregar dados existentes se não for primeiro cadastro
   useEffect(() => {
     if (!isFirstTimeSetup && existingData && !dataLoading) {
-      console.log('Loading existing therapist data:', existingData);
+      console.log('TherapistProfile - Loading existing therapist data:', existingData);
       
       const parsedFormacao = parseFormacao(existingData.formacao);
       
@@ -181,7 +180,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
     }
   }, [existingData, dataLoading, isFirstTimeSetup, reset]);
 
-  // Verificar se o usuário está autenticado e é terapeuta
+  // Simplified authentication check - remove redundant redirects
   useEffect(() => {
     console.log('TherapistProfile - Auth check:', {
       authLoading,
@@ -190,8 +189,9 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
       userType: profile?.tipo_usuario
     });
 
-    if (!authLoading && (!user || !profile)) {
-      console.log('TherapistProfile - No user or profile, redirecting to login');
+    // Only check basic authentication, don't redirect
+    if (!authLoading && !user) {
+      console.log('TherapistProfile - No user, redirecting to login');
       navigate('/login');
       return;
     }
@@ -233,7 +233,10 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
   };
 
   const onSubmit = async (data: TherapistProfileFormData) => {
-    if (!user || !profile) return;
+    if (!user || !profile) {
+      console.log('TherapistProfile - No user or profile for submission');
+      return;
+    }
 
     console.log('TherapistProfile - Submitting profile data');
 
@@ -268,7 +271,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
       console.log('TherapistProfile - Profile saved successfully, redirecting to dashboard');
       navigate('/dashboard-terapeuta');
     } catch (error) {
-      console.error('Error saving profile:', error);
+      console.error('TherapistProfile - Error saving profile:', error);
       toast({
         title: 'Erro ao salvar perfil',
         description: 'Ocorreu um erro ao salvar seu perfil. Tente novamente.',
@@ -277,7 +280,8 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
     }
   };
 
-  if (authLoading || (!isFirstTimeSetup && dataLoading)) {
+  // Show loading only when auth is loading OR when it's first time setup and no data loaded yet
+  if (authLoading || (isFirstTimeSetup && !user)) {
     console.log('TherapistProfile - Showing loading state');
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

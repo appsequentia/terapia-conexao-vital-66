@@ -25,6 +25,13 @@ const ProtectedRoute = ({
     userType: profile?.tipo_usuario
   });
 
+  // Special handling for registration routes
+  const isRegistrationRoute = [
+    '/completar-cadastro-terapeuta',
+    '/perfil-terapeuta',
+    '/editar-perfil-terapeuta'
+  ].includes(location.pathname);
+
   // Mostrar loading enquanto verifica autenticação
   if (isLoading) {
     console.log('ProtectedRoute - Showing loading spinner for path:', location.pathname);
@@ -39,6 +46,12 @@ const ProtectedRoute = ({
   if (requireAuth && !isAuthenticated) {
     console.log('ProtectedRoute - Redirecting to login, user not authenticated for path:', location.pathname);
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
+  }
+
+  // For registration routes, allow access if authenticated regardless of profile completeness
+  if (isRegistrationRoute && isAuthenticated) {
+    console.log('ProtectedRoute - Allowing access to registration route:', location.pathname);
+    return <>{children}</>;
   }
 
   // Renderizar children em todos os outros casos

@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,6 +51,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [redirectTimeout, setRedirectTimeout] = useState<NodeJS.Timeout | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -69,13 +69,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     currentPath: location.pathname
   });
 
-  // Helper function to check if user is in registration flow
+  // Enhanced function to check if user is in registration flow
   const isInRegistrationFlow = () => {
-    const registrationPaths = ['/cadastro', '/completar-cadastro-terapeuta'];
-    return registrationPaths.includes(location.pathname);
+    const registrationPaths = [
+      '/cadastro', 
+      '/completar-cadastro-terapeuta', 
+      '/perfil-terapeuta',
+      '/editar-perfil-terapeuta'
+    ];
+    const isInFlow = registrationPaths.includes(location.pathname);
+    console.log('AuthContext - Registration flow check:', {
+      currentPath: location.pathname,
+      isInFlow,
+      registrationPaths
+    });
+    return isInFlow;
   };
 
   const handleUserRedirect = async (user: User, profile: Profile) => {
+    console.log('AuthContext - handleUserRedirect called:', {
+      userType: profile.tipo_usuario,
+      currentPath: location.pathname,
+      isInRegistrationFlow: isInRegistrationFlow()
+    });
+
     // Don't redirect if user is already in registration flow
     if (isInRegistrationFlow()) {
       console.log('AuthContext - User in registration flow, skipping redirect');
@@ -85,19 +102,38 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // For therapists, check if they have completed their profile
     if (profile.tipo_usuario === 'therapist') {
       try {
-        const { data: therapistData } = await supabase
+        console.log('AuthContext - Checking therapist profile completion');
+        const { data: therapistData, error } = await supabase
           .from('terapeutas')
           .select('id')
           .eq('user_id', user.id)
           .maybeSingle();
 
-        if (!therapistData) {
-          console.log('AuthContext - Therapist profile incomplete, redirecting to setup');
-          navigate('/completar-cadastro-terapeuta');
+        if (error) {
+          console.error('AuthContext - Error checking therapist profile:', error);
           return;
         }
+
+        if (!therapistData) {
+          console.log('AuthContext - Therapist profile incomplete, redirecting to setup');
+          // Clear any existing timeout
+          if (redirectTimeout) {
+            clearTimeout(redirectTimeout);
+          }
+          // Set a timeout to prevent infinite loops
+          const timeout = setTimeout(() => {
+            if (location.pathname !== '/completar-cadastro-terapeuta') {
+              navigate('/completar-cadastro-terapeuta');
+            }
+          }, 100);
+          setRedirectTimeout(timeout);
+          return;
+        }
+
+        console.log('AuthContext - Therapist profile complete');
       } catch (error) {
         console.error('AuthContext - Error checking therapist profile:', error);
+        return;
       }
     }
 
@@ -106,9 +142,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       ? '/dashboard-terapeuta' 
       : '/dashboard-cliente';
     
-    if (location.pathname !== dashboardPath) {
+    if (location.pathname !== dashboardPath && !isInRegistrationFlow()) {
       console.log('AuthContext - Redirecting to dashboard:', dashboardPath);
-      navigate(dashboardPath);
+      // Clear any existing timeout
+      if (redirectTimeout) {
+        clearTimeout(redirectTimeout);
+      }
+      // Set a timeout to prevent conflicts
+      const timeout = setTimeout(() => {
+        navigate(dashboardPath);
+      }, 100);
+      setRedirectTimeout(timeout);
     }
   };
 
@@ -148,7 +192,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
             console.log('AuthContext - Auth state changed:', event, {
               hasSession: !!session,
-              userId: session?.user?.id
+              userId: session?.user?.id,
+              currentPath: location.pathname
             });
             
             // Always update session and user state immediately
@@ -164,10 +209,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 if (mounted) {
                   setProfile(userProfile);
                   if (userProfile) {
-                    await handleUserRedirect(session.user, userProfile);
+                    // Only redirect if not in registration flow
+                    if (!isInRegistrationFlow()) {
+                      await handleUserRedirect(session.user, userProfile);
+                    }
                   }
                 }
-              }, 0);
+              }, 100);
             } else {
               console.log('AuthContext - No user session, clearing profile');
               if (mounted) {
@@ -183,7 +231,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         if (mounted) {
           console.log('AuthContext - Initial session check:', {
             hasSession: !!initialSession,
-            userId: initialSession?.user?.id
+            userId: initialSession?.user?.id,
+            currentPath: location.pathname
           });
           
           setSession(initialSession);
@@ -198,10 +247,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               if (mounted) {
                 setProfile(userProfile);
                 if (userProfile) {
-                  await handleUserRedirect(initialSession.user, userProfile);
+                  // Only redirect if not in registration flow
+                  if (!isInRegistrationFlow()) {
+                    await handleUserRedirect(initialSession.user, userProfile);
+                  }
                 }
               }
-            }, 0);
+            }, 100);
           }
         }
 
@@ -226,6 +278,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     return () => {
       mounted = false;
+      if (redirectTimeout) {
+        clearTimeout(redirectTimeout);
+      }
       cleanup?.then(cleanupFn => cleanupFn?.());
     };
   }, [navigate, location.pathname]);
@@ -289,6 +344,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(null);
       setProfile(null);
       setSession(null);
+      
+      // Clear any existing timeout
+      if (redirectTimeout) {
+        clearTimeout(redirectTimeout);
+      }
       
       console.log('AuthContext - Logout successful, redirecting to home');
       navigate('/');
