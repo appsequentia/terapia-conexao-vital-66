@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,12 +53,33 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [redirectTimeout, setRedirectTimeout] = useState<NodeJS.Timeout | null>(null);
   const [redirectAttempts, setRedirectAttempts] = useState(0);
+  const [isNavigating, setIsNavigating] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
   // Strict authentication check - user must have valid session AND user object
   const isAuthenticated = Boolean(session && user && session.access_token);
+
+  // Define public routes that should NEVER trigger redirects
+  const PUBLIC_ROUTES = [
+    '/',
+    '/encontrar-terapeutas',
+    '/terapeuta',
+    '/como-funciona',
+    '/para-terapeutas',
+    '/login',
+    '/cadastro',
+    '/esqueci-senha'
+  ];
+
+  // Check if current path is a public route
+  const isPublicRoute = () => {
+    return PUBLIC_ROUTES.some(route => 
+      location.pathname === route || 
+      location.pathname.startsWith(route + '/')
+    );
+  };
 
   console.log('AuthContext - Current state:', {
     hasUser: !!user,
@@ -69,7 +89,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isLoading,
     userEmail: user?.email,
     currentPath: location.pathname,
-    redirectAttempts
+    redirectAttempts,
+    isPublicRoute: isPublicRoute(),
+    isNavigating
   });
 
   // Enhanced function to check if user is in registration flow
@@ -89,15 +111,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return isInFlow;
   };
 
+  // Track navigation state changes
+  useEffect(() => {
+    setIsNavigating(true);
+    const timer = setTimeout(() => setIsNavigating(false), 500);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
+
   const handleUserRedirect = async (user: User, profile: Profile) => {
-    // CRITICAL: Only proceed if user is actually authenticated
+    // CRITICAL: Multiple safety checks before any redirect
     if (!isAuthenticated || !session?.access_token) {
       console.log('AuthContext - User not properly authenticated, skipping redirect');
       return;
     }
 
+    // Don't redirect if user is on a public route (they chose to be there)
+    if (isPublicRoute()) {
+      console.log('AuthContext - User on public route, skipping redirect');
+      return;
+    }
+
+    // Don't redirect during navigation transitions
+    if (isNavigating) {
+      console.log('AuthContext - Currently navigating, skipping redirect');
+      return;
+    }
+
     // Prevent infinite loops with redirect attempts limit
-    if (redirectAttempts >= 3) {
+    if (redirectAttempts >= 2) {
       console.log('AuthContext - Max redirect attempts reached, stopping redirects');
       return;
     }
@@ -106,7 +147,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       userType: profile.tipo_usuario,
       currentPath: location.pathname,
       isInRegistrationFlow: isInRegistrationFlow(),
-      redirectAttempts
+      redirectAttempts,
+      isPublicRoute: isPublicRoute()
     });
 
     // Don't redirect if user is already in registration flow
@@ -141,10 +183,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           
           // Set a timeout to prevent infinite loops
           const timeout = setTimeout(() => {
-            if (location.pathname !== '/completar-cadastro-terapeuta' && isAuthenticated) {
+            if (location.pathname !== '/completar-cadastro-terapeuta' && isAuthenticated && !isPublicRoute()) {
               navigate('/completar-cadastro-terapeuta');
             }
-          }, 100);
+          }, 300);
           setRedirectTimeout(timeout);
           return;
         }
@@ -157,7 +199,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
 
     // Redirect to appropriate dashboard only if not already there and user is authenticated
-    if (isAuthenticated) {
+    if (isAuthenticated && !isPublicRoute()) {
       const dashboardPath = profile.tipo_usuario === 'therapist' 
         ? '/dashboard-terapeuta' 
         : '/dashboard-cliente';
@@ -173,10 +215,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         
         // Set a timeout to prevent conflicts
         const timeout = setTimeout(() => {
-          if (isAuthenticated) {
+          if (isAuthenticated && !isPublicRoute()) {
             navigate(dashboardPath);
           }
-        }, 100);
+        }, 300);
         setRedirectTimeout(timeout);
       }
     }
@@ -220,7 +262,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               hasSession: !!session,
               userId: session?.user?.id,
               currentPath: location.pathname,
-              hasAccessToken: !!session?.access_token
+              hasAccessToken: !!session?.access_token,
+              isPublicRoute: isPublicRoute()
             });
             
             // Always update session and user state immediately
@@ -239,13 +282,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 if (mounted) {
                   setProfile(userProfile);
                   if (userProfile && session?.access_token) {
-                    // Only redirect if user is properly authenticated and not in registration flow
-                    if (!isInRegistrationFlow()) {
+                    // Only redirect if user is properly authenticated and NOT on public routes
+                    if (!isPublicRoute() && !isInRegistrationFlow()) {
                       await handleUserRedirect(session.user, userProfile);
                     }
                   }
                 }
-              }, 100);
+              }, 200);
             } else {
               console.log('AuthContext - No valid session, clearing profile');
               if (mounted) {
@@ -264,7 +307,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             hasSession: !!initialSession,
             userId: initialSession?.user?.id,
             currentPath: location.pathname,
-            hasAccessToken: !!initialSession?.access_token
+            hasAccessToken: !!initialSession?.access_token,
+            isPublicRoute: isPublicRoute()
           });
           
           setSession(initialSession);
@@ -279,13 +323,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               if (mounted) {
                 setProfile(userProfile);
                 if (userProfile && initialSession?.access_token) {
-                  // Only redirect if user is properly authenticated and not in registration flow
-                  if (!isInRegistrationFlow()) {
+                  // Only redirect if user is properly authenticated and NOT on public routes
+                  if (!isPublicRoute() && !isInRegistrationFlow()) {
                     await handleUserRedirect(initialSession.user, userProfile);
                   }
                 }
               }
-            }, 100);
+            }, 200);
           }
         }
 
