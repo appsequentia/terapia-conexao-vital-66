@@ -1,0 +1,107 @@
+
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+
+export interface Appointment {
+  id: string;
+  therapist_id: string;
+  client_id: string;
+  appointment_date: string;
+  start_time: string;
+  end_time: string;
+  session_type: 'online' | 'in-person';
+  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled';
+  payment_status: 'pending' | 'paid' | 'refunded';
+  notes?: string;
+  meeting_link?: string;
+}
+
+export interface CreateAppointmentData {
+  therapist_id: string;
+  appointment_date: string;
+  start_time: string;
+  end_time: string;
+  session_type: 'online' | 'in-person';
+  notes?: string;
+}
+
+export const useAppointments = (therapistId: string, date: string) => {
+  return useQuery({
+    queryKey: ['appointments', therapistId, date],
+    queryFn: async (): Promise<Appointment[]> => {
+      console.log('Fetching appointments for therapist:', therapistId, 'date:', date);
+      
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('therapist_id', therapistId)
+        .eq('appointment_date', date)
+        .in('status', ['scheduled', 'confirmed']);
+
+      if (error) {
+        console.error('Error fetching appointments:', error);
+        throw error;
+      }
+
+      console.log('Appointments data:', data);
+      return data || [];
+    },
+    enabled: !!therapistId && !!date,
+  });
+};
+
+export const useCreateAppointment = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: CreateAppointmentData): Promise<Appointment> => {
+      if (!user?.id) {
+        throw new Error('Usuário não autenticado');
+      }
+
+      console.log('Creating appointment:', data);
+
+      const appointmentData = {
+        ...data,
+        client_id: user.id,
+      };
+
+      const { data: result, error } = await supabase
+        .from('appointments')
+        .insert(appointmentData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating appointment:', error);
+        throw error;
+      }
+
+      console.log('Appointment created successfully:', result);
+      return result;
+    },
+    onSuccess: (data) => {
+      // Invalidate and refetch appointments
+      queryClient.invalidateQueries({ 
+        queryKey: ['appointments', data.therapist_id] 
+      });
+      
+      toast({
+        title: 'Agendamento realizado!',
+        description: 'Sua consulta foi agendada com sucesso.',
+      });
+    },
+    onError: (error) => {
+      console.error('Error creating appointment:', error);
+      toast({
+        title: 'Erro ao agendar',
+        description: 'Não foi possível realizar o agendamento. Tente novamente.',
+        variant: 'destructive',
+      });
+    },
+  });
+};
