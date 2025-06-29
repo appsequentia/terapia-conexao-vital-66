@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -237,7 +236,7 @@ const CheckoutPage = () => {
                     <Checkbox 
                       id="saveCard" 
                       checked={saveCard}
-                      onCheckedChange={setSaveCard}
+                      onCheckedChange={(checked) => setSaveCard(checked === true)}
                     />
                     <Label htmlFor="saveCard" className="text-sm">
                       Salvar cartão para próximas compras
