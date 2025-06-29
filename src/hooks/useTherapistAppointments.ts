@@ -30,47 +30,65 @@ export const useTherapistAppointments = (dateFilter?: string) => {
 
       console.log('Fetching therapist appointments for user:', user.id, 'date:', dateFilter);
 
-      let query = supabase
+      // Primeiro, buscar os agendamentos
+      let appointmentsQuery = supabase
         .from('appointments')
-        .select(`
-          *,
-          profiles!appointments_client_id_fkey (
-            nome,
-            email
-          )
-        `)
+        .select('*')
         .eq('therapist_id', user.id)
         .order('appointment_date', { ascending: true })
         .order('start_time', { ascending: true });
 
       if (dateFilter) {
-        query = query.eq('appointment_date', dateFilter);
+        appointmentsQuery = appointmentsQuery.eq('appointment_date', dateFilter);
       }
 
-      const { data, error } = await query;
+      const { data: appointments, error: appointmentsError } = await appointmentsQuery;
 
-      if (error) {
-        console.error('Error fetching therapist appointments:', error);
-        throw error;
+      if (appointmentsError) {
+        console.error('Error fetching therapist appointments:', appointmentsError);
+        throw appointmentsError;
       }
 
-      console.log('Therapist appointments data:', data);
+      console.log('Raw appointments data:', appointments);
 
-      // Mapear e tipar os dados
-      const typedData: TherapistAppointment[] = (data || []).map(appointment => ({
-        id: appointment.id,
-        client_id: appointment.client_id,
-        appointment_date: appointment.appointment_date,
-        start_time: appointment.start_time,
-        end_time: appointment.end_time,
-        session_type: appointment.session_type as 'online' | 'in-person',
-        status: appointment.status as 'scheduled' | 'confirmed' | 'completed' | 'cancelled',
-        payment_status: appointment.payment_status as 'pending' | 'paid' | 'refunded',
-        notes: appointment.notes,
-        meeting_link: appointment.meeting_link,
-        client_name: appointment.profiles?.nome,
-        client_email: appointment.profiles?.email,
-      }));
+      // Se não há agendamentos, retornar array vazio
+      if (!appointments || appointments.length === 0) {
+        return [];
+      }
+
+      // Buscar os perfis dos clientes separadamente
+      const clientIds = [...new Set(appointments.map(apt => apt.client_id))];
+      
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, nome, email, avatar_url')
+        .in('id', clientIds);
+
+      if (profilesError) {
+        console.error('Error fetching client profiles:', profilesError);
+      }
+
+      console.log('Client profiles data:', profiles);
+
+      // Mapear os dados combinando agendamentos com perfis
+      const typedData: TherapistAppointment[] = appointments.map(appointment => {
+        const clientProfile = profiles?.find(profile => profile.id === appointment.client_id);
+        
+        return {
+          id: appointment.id,
+          client_id: appointment.client_id,
+          appointment_date: appointment.appointment_date,
+          start_time: appointment.start_time,
+          end_time: appointment.end_time,
+          session_type: appointment.session_type as 'online' | 'in-person',
+          status: appointment.status as 'scheduled' | 'confirmed' | 'completed' | 'cancelled',
+          payment_status: appointment.payment_status as 'pending' | 'paid' | 'refunded',
+          notes: appointment.notes,
+          meeting_link: appointment.meeting_link,
+          client_name: clientProfile?.nome || 'Nome não disponível',
+          client_email: clientProfile?.email || 'Email não disponível',
+        };
+      });
 
       return typedData;
     },

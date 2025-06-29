@@ -33,38 +33,48 @@ const ClientsList = () => {
 
       console.log('Fetching clients for therapist:', user.id);
 
-      const { data: appointments, error } = await supabase
+      // Primeiro, buscar os agendamentos
+      const { data: appointments, error: appointmentsError } = await supabase
         .from('appointments')
-        .select(`
-          client_id,
-          appointment_date,
-          profiles!appointments_client_id_fkey (
-            id,
-            nome,
-            email,
-            avatar_url
-          )
-        `)
+        .select('client_id, appointment_date')
         .eq('therapist_id', user.id)
         .order('appointment_date', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching clients:', error);
-        throw error;
+      if (appointmentsError) {
+        console.error('Error fetching appointments:', appointmentsError);
+        throw appointmentsError;
+      }
+
+      if (!appointments || appointments.length === 0) {
+        return [];
+      }
+
+      // Obter IDs únicos dos clientes
+      const clientIds = [...new Set(appointments.map(apt => apt.client_id))];
+
+      // Buscar os perfis dos clientes
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, nome, email, avatar_url')
+        .in('id', clientIds);
+
+      if (profilesError) {
+        console.error('Error fetching client profiles:', profilesError);
+        throw profilesError;
       }
 
       // Processar dados para obter informações únicas dos clientes
       const clientsMap = new Map<string, ClientData>();
 
-      appointments?.forEach(appointment => {
+      appointments.forEach(appointment => {
         const clientId = appointment.client_id;
-        const profile = appointment.profiles;
+        const profile = profiles?.find(p => p.id === clientId);
 
         if (!clientsMap.has(clientId) && profile) {
           clientsMap.set(clientId, {
             id: clientId,
             name: profile.nome || 'Nome não disponível',
-            email: profile.email || '',
+            email: profile.email || 'Email não disponível',
             avatar_url: profile.avatar_url,
             lastAppointment: appointment.appointment_date,
             totalSessions: 1,
