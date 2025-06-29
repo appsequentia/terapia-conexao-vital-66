@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, MapPin, Clock, Video, User, Calendar, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,6 +19,12 @@ const TherapistDetail = () => {
   const handleToggleFavorite = () => {
     if (therapist) {
       toggleFavorite(therapist.id);
+    }
+  };
+
+  const handleBookAppointment = () => {
+    if (therapist) {
+      navigate(`/agendamento/${therapist.id}`);
     }
   };
 

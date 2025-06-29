@@ -24,6 +24,8 @@ import CreditCardCheckoutPage from "./pages/CreditCardCheckoutPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import ChatPage from "./pages/ChatPage";
 import VideoCallPage from "./pages/VideoCallPage";
+import BookingPage from "./pages/BookingPage";
+import CheckoutPage from "./pages/CheckoutPage";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,31 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/encontrar-terapeutas" element={<FindTherapists />} />
             <Route path="/terapeuta/:id" element={<TherapistDetail />} />
+            <Route 
+              path="/agendamento/:id" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <BookingPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/payment-method/:appointmentId" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <PaymentMethodPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/checkout/:appointmentId/:method" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <CheckoutPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/payment-success" element={<PaymentSuccessPage />} />
             <Route path="/como-funciona" element={<HowItWorks />} />
             <Route path="/para-terapeutas" element={<ParaTerapeutas />} />
             <Route 

@@ -14,7 +14,7 @@ const ProtectedRoute = ({
   requireAuth = true, 
   redirectTo = '/login' 
 }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, profile } = useAuth();
+  const { isAuthenticated, isLoading, profile, session } = useAuth();
   const location = useLocation();
 
   console.log('ProtectedRoute - Path:', location.pathname, {
@@ -46,20 +46,20 @@ const ProtectedRoute = ({
     );
   }
 
-  // Se requer autenticação mas usuário não está autenticado
-  if (requireAuth && !isAuthenticated) {
-    console.log('ProtectedRoute - Redirecting to login, user not authenticated for path:', location.pathname);
+  // If authentication is required but user is not properly authenticated
+  if (requireAuth && (!isAuthenticated || !session?.access_token)) {
+    console.log('ProtectedRoute - Redirecting to login, user not properly authenticated for path:', location.pathname);
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // For registration routes, allow access if authenticated regardless of profile completeness
-  if (isRegistrationRoute && isAuthenticated) {
-    console.log('ProtectedRoute - Allowing access to registration route:', location.pathname);
+  // For non-auth routes (like login/register pages), allow access regardless of auth status
+  if (!requireAuth) {
+    console.log('ProtectedRoute - Non-auth route, allowing access to:', location.pathname);
     return <>{children}</>;
   }
 
-  // Renderizar children em todos os outros casos
-  console.log('ProtectedRoute - Rendering children for path:', location.pathname);
+  // Render children for authenticated routes
+  console.log('ProtectedRoute - Rendering children for authenticated path:', location.pathname);
   return <>{children}</>;
 };
 
