@@ -34,6 +34,10 @@ const BookingPage = () => {
   );
   const createAppointmentMutation = useCreateAppointment();
 
+  console.log('BookingPage - Therapist data:', therapist);
+  console.log('BookingPage - Availability data:', availability);
+  console.log('BookingPage - Appointments data:', appointments);
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -105,12 +109,23 @@ const BookingPage = () => {
   };
 
   const handleTimeSelect = (time: string) => {
+    console.log('Time selected:', time);
     setSelectedTime(time);
     setShowConfirmation(true);
   };
 
   const handleConfirmBooking = async () => {
-    if (!selectedDate || !selectedTime) return;
+    if (!selectedDate || !selectedTime || !therapist) {
+      console.error('Missing required data for booking');
+      return;
+    }
+
+    console.log('Confirming booking with data:', {
+      therapist_id: id,
+      selectedDate: format(selectedDate, 'yyyy-MM-dd'),
+      selectedTime,
+      sessionType
+    });
 
     const endTime = format(addMinutes(parseISO(`2000-01-01T${selectedTime}`), 60), 'HH:mm');
 
@@ -123,6 +138,8 @@ const BookingPage = () => {
         session_type: sessionType,
       });
 
+      console.log('Appointment created:', appointment);
+      
       setShowConfirmation(false);
       setSelectedTime(undefined);
       
@@ -134,6 +151,21 @@ const BookingPage = () => {
   };
 
   const timeSlots = generateTimeSlots();
+
+  // Preparar dados para o modal de confirmação
+  const therapistName = therapist.name || therapist.nome || 'Terapeuta';
+  const therapistSpecialties = therapist.specialties?.map(s => s.name) || 
+                              therapist.especialidades || 
+                              [];
+  const sessionPrice = therapist.pricePerSession || therapist.price_per_session || 0;
+
+  console.log('Modal data:', {
+    therapistName,
+    therapistSpecialties,
+    sessionPrice,
+    selectedDate,
+    selectedTime
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -156,13 +188,13 @@ const BookingPage = () => {
           </div>
           
           <p className="text-muted-foreground">
-            Agende sua consulta com {therapist.name}
+            Agende sua consulta com {therapistName}
           </p>
           
           <div className="flex flex-wrap gap-2 mt-3">
-            {therapist.specialties.map((specialty) => (
-              <Badge key={specialty.id} variant="secondary">
-                {specialty.name}
+            {therapistSpecialties.map((specialty, index) => (
+              <Badge key={index} variant="secondary">
+                {specialty}
               </Badge>
             ))}
           </div>
@@ -235,18 +267,20 @@ const BookingPage = () => {
         </div>
       </div>
 
-      <BookingConfirmationModal
-        isOpen={showConfirmation}
-        onClose={() => setShowConfirmation(false)}
-        onConfirm={handleConfirmBooking}
-        therapistName={therapist.name}
-        therapistSpecialties={therapist.specialties.map(s => s.name)}
-        selectedDate={selectedDate!}
-        selectedTime={selectedTime!}
-        sessionType={sessionType}
-        sessionPrice={therapist.pricePerSession}
-        isLoading={createAppointmentMutation.isPending}
-      />
+      {showConfirmation && selectedDate && selectedTime && (
+        <BookingConfirmationModal
+          isOpen={showConfirmation}
+          onClose={() => setShowConfirmation(false)}
+          onConfirm={handleConfirmBooking}
+          therapistName={therapistName}
+          therapistSpecialties={therapistSpecialties}
+          selectedDate={selectedDate}
+          selectedTime={selectedTime}
+          sessionType={sessionType}
+          sessionPrice={sessionPrice}
+          isLoading={createAppointmentMutation.isPending}
+        />
+      )}
     </div>
   );
 };

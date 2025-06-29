@@ -36,6 +36,16 @@ export const BookingConfirmationModal = ({
   sessionPrice,
   isLoading = false,
 }: BookingConfirmationModalProps) => {
+  console.log('BookingConfirmationModal props:', {
+    therapistName,
+    therapistSpecialties,
+    selectedDate,
+    selectedTime,
+    sessionType,
+    sessionPrice,
+    isLoading
+  });
+
   const formatDate = (date: Date) => {
     return format(date, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR });
   };
@@ -45,12 +55,16 @@ export const BookingConfirmationModal = ({
   };
 
   const formatPrice = (price?: number) => {
-    if (!price) return 'Valor a combinar';
+    if (!price || price === 0) return 'Valor a combinar';
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format(price);
   };
+
+  const displaySpecialties = Array.isArray(therapistSpecialties) 
+    ? therapistSpecialties.join(', ') 
+    : 'Especialidades não informadas';
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -67,7 +81,7 @@ export const BookingConfirmationModal = ({
             <div>
               <p className="font-medium">{therapistName}</p>
               <p className="text-sm text-muted-foreground">
-                {therapistSpecialties.join(', ')}
+                {displaySpecialties}
               </p>
             </div>
           </div>

@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, MapPin, Clock, Video, User, Calendar, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,6 +19,12 @@ const TherapistDetail = () => {
   const handleToggleFavorite = () => {
     if (therapist) {
       toggleFavorite(therapist.id);
+    }
+  };
+
+  const handleBookAppointment = () => {
+    if (therapist) {
+      navigate(`/agendamento/${therapist.id}`);
     }
   };
 
@@ -138,7 +143,7 @@ const TherapistDetail = () => {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <Button size="lg" className="flex-1 hover-scale">
+                  <Button size="lg" className="flex-1 hover-scale" onClick={handleBookAppointment}>
                     <Calendar className="h-4 w-4 mr-2" />
                     Agendar Consulta
                   </Button>
