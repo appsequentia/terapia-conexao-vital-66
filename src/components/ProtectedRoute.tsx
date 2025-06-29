@@ -27,13 +27,6 @@ const ProtectedRoute = ({
     hasAccessToken: !!session?.access_token
   });
 
-  // Special handling for registration routes - allow if authenticated
-  const isRegistrationRoute = [
-    '/completar-cadastro-terapeuta',
-    '/perfil-terapeuta',
-    '/editar-perfil-terapeuta'
-  ].includes(location.pathname);
-
   // Show loading while verifying authentication
   if (isLoading) {
     console.log('ProtectedRoute - Showing loading spinner for path:', location.pathname);
@@ -50,21 +43,14 @@ const ProtectedRoute = ({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // For registration routes, allow access if properly authenticated
-  if (isRegistrationRoute && isAuthenticated && session?.access_token) {
-    console.log('ProtectedRoute - Allowing access to registration route:', location.pathname);
+  // For non-auth routes (like login/register pages), allow access regardless of auth status
+  if (!requireAuth) {
+    console.log('ProtectedRoute - Non-auth route, allowing access to:', location.pathname);
     return <>{children}</>;
   }
 
-  // For non-auth routes (like login/register pages), redirect authenticated users away
-  if (!requireAuth && isAuthenticated && session?.access_token) {
-    console.log('ProtectedRoute - Authenticated user accessing non-auth route, allowing access');
-    // Don't auto-redirect from non-auth pages to avoid loops
-    return <>{children}</>;
-  }
-
-  // Render children in all other cases
-  console.log('ProtectedRoute - Rendering children for path:', location.pathname);
+  // Render children for authenticated routes
+  console.log('ProtectedRoute - Rendering children for authenticated path:', location.pathname);
   return <>{children}</>;
 };
 

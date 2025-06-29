@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -51,9 +52,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [redirectTimeout, setRedirectTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [redirectAttempts, setRedirectAttempts] = useState(0);
-  const [isNavigating, setIsNavigating] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -88,10 +86,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isAuthenticated,
     isLoading,
     userEmail: user?.email,
+    userType: profile?.tipo_usuario,
     currentPath: location.pathname,
-    redirectAttempts,
-    isPublicRoute: isPublicRoute(),
-    isNavigating
+    isPublicRoute: isPublicRoute()
   });
 
   // Enhanced function to check if user is in registration flow
@@ -102,54 +99,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       '/perfil-terapeuta',
       '/editar-perfil-terapeuta'
     ];
-    const isInFlow = registrationPaths.includes(location.pathname);
-    console.log('AuthContext - Registration flow check:', {
-      currentPath: location.pathname,
-      isInFlow,
-      registrationPaths
-    });
-    return isInFlow;
+    return registrationPaths.includes(location.pathname);
   };
 
-  // Track navigation state changes
-  useEffect(() => {
-    setIsNavigating(true);
-    const timer = setTimeout(() => setIsNavigating(false), 500);
-    return () => clearTimeout(timer);
-  }, [location.pathname]);
-
   const handleUserRedirect = async (user: User, profile: Profile) => {
-    // CRITICAL: Multiple safety checks before any redirect
+    // CRITICAL: Only redirect if user is properly authenticated
     if (!isAuthenticated || !session?.access_token) {
       console.log('AuthContext - User not properly authenticated, skipping redirect');
       return;
     }
 
-    // Don't redirect if user is on a public route (they chose to be there)
+    // NEVER redirect from public routes
     if (isPublicRoute()) {
       console.log('AuthContext - User on public route, skipping redirect');
       return;
     }
-
-    // Don't redirect during navigation transitions
-    if (isNavigating) {
-      console.log('AuthContext - Currently navigating, skipping redirect');
-      return;
-    }
-
-    // Prevent infinite loops with redirect attempts limit
-    if (redirectAttempts >= 2) {
-      console.log('AuthContext - Max redirect attempts reached, stopping redirects');
-      return;
-    }
-
-    console.log('AuthContext - handleUserRedirect called:', {
-      userType: profile.tipo_usuario,
-      currentPath: location.pathname,
-      isInRegistrationFlow: isInRegistrationFlow(),
-      redirectAttempts,
-      isPublicRoute: isPublicRoute()
-    });
 
     // Don't redirect if user is already in registration flow
     if (isInRegistrationFlow()) {
@@ -157,10 +121,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       return;
     }
 
-    // For therapists, check if they have completed their profile
-    if (profile.tipo_usuario === 'therapist') {
+    console.log('AuthContext - handleUserRedirect called:', {
+      userType: profile.tipo_usuario,
+      currentPath: location.pathname,
+      userId: user.id,
+      profileId: profile.id
+    });
+
+    // CRITICAL: Only check therapist profile for therapists, and only for the current user
+    if (profile.tipo_usuario === 'therapist' && user.id === profile.id) {
       try {
-        console.log('AuthContext - Checking therapist profile completion');
+        console.log('AuthContext - Checking therapist profile completion for user:', user.id);
         const { data: therapistData, error } = await supabase
           .from('terapeutas')
           .select('id')
@@ -172,22 +143,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           return;
         }
 
+        // Only redirect if therapist profile is incomplete
         if (!therapistData) {
           console.log('AuthContext - Therapist profile incomplete, redirecting to setup');
-          setRedirectAttempts(prev => prev + 1);
-          
-          // Clear any existing timeout
-          if (redirectTimeout) {
-            clearTimeout(redirectTimeout);
+          if (location.pathname !== '/completar-cadastro-terapeuta') {
+            navigate('/completar-cadastro-terapeuta');
           }
-          
-          // Set a timeout to prevent infinite loops
-          const timeout = setTimeout(() => {
-            if (location.pathname !== '/completar-cadastro-terapeuta' && isAuthenticated && !isPublicRoute()) {
-              navigate('/completar-cadastro-terapeuta');
-            }
-          }, 300);
-          setRedirectTimeout(timeout);
           return;
         }
 
@@ -198,28 +159,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     }
 
-    // Redirect to appropriate dashboard only if not already there and user is authenticated
-    if (isAuthenticated && !isPublicRoute()) {
+    // Only redirect to dashboard if user is not on a public route and not in registration flow
+    if (isAuthenticated && !isPublicRoute() && !isInRegistrationFlow()) {
       const dashboardPath = profile.tipo_usuario === 'therapist' 
         ? '/dashboard-terapeuta' 
         : '/dashboard-cliente';
       
-      if (location.pathname !== dashboardPath && !isInRegistrationFlow()) {
+      if (location.pathname !== dashboardPath) {
         console.log('AuthContext - Redirecting to dashboard:', dashboardPath);
-        setRedirectAttempts(prev => prev + 1);
-        
-        // Clear any existing timeout
-        if (redirectTimeout) {
-          clearTimeout(redirectTimeout);
-        }
-        
-        // Set a timeout to prevent conflicts
-        const timeout = setTimeout(() => {
-          if (isAuthenticated && !isPublicRoute()) {
-            navigate(dashboardPath);
-          }
-        }, 300);
-        setRedirectTimeout(timeout);
+        navigate(dashboardPath);
       }
     }
   };
@@ -269,9 +217,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             // Always update session and user state immediately
             setSession(session);
             setUser(session?.user ?? null);
-            
-            // Reset redirect attempts on auth state change
-            setRedirectAttempts(0);
 
             if (session?.user && session?.access_token) {
               console.log('AuthContext - Valid session detected, fetching profile...');
@@ -281,11 +226,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 const userProfile = await fetchProfile(session.user.id);
                 if (mounted) {
                   setProfile(userProfile);
-                  if (userProfile && session?.access_token) {
-                    // Only redirect if user is properly authenticated and NOT on public routes
-                    if (!isPublicRoute() && !isInRegistrationFlow()) {
-                      await handleUserRedirect(session.user, userProfile);
-                    }
+                  // Only attempt redirect if we have a valid profile and user is authenticated
+                  if (userProfile && session?.access_token && !isPublicRoute()) {
+                    await handleUserRedirect(session.user, userProfile);
                   }
                 }
               }, 200);
@@ -293,7 +236,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               console.log('AuthContext - No valid session, clearing profile');
               if (mounted) {
                 setProfile(null);
-                setRedirectAttempts(0);
               }
             }
           }
@@ -322,11 +264,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               const userProfile = await fetchProfile(initialSession.user.id);
               if (mounted) {
                 setProfile(userProfile);
-                if (userProfile && initialSession?.access_token) {
-                  // Only redirect if user is properly authenticated and NOT on public routes
-                  if (!isPublicRoute() && !isInRegistrationFlow()) {
-                    await handleUserRedirect(initialSession.user, userProfile);
-                  }
+                // Only attempt redirect if we have a valid profile and user is authenticated
+                if (userProfile && initialSession?.access_token && !isPublicRoute()) {
+                  await handleUserRedirect(initialSession.user, userProfile);
                 }
               }
             }, 200);
@@ -354,9 +294,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     return () => {
       mounted = false;
-      if (redirectTimeout) {
-        clearTimeout(redirectTimeout);
-      }
       cleanup?.then(cleanupFn => cleanupFn?.());
     };
   }, [navigate, location.pathname]);
@@ -420,11 +357,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUser(null);
       setProfile(null);
       setSession(null);
-      
-      // Clear any existing timeout
-      if (redirectTimeout) {
-        clearTimeout(redirectTimeout);
-      }
       
       console.log('AuthContext - Logout successful, redirecting to home');
       navigate('/');

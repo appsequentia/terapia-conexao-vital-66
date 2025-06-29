@@ -9,9 +9,9 @@ export const useTherapistProfileCheck = () => {
   return useQuery({
     queryKey: ['therapist-profile-check', user?.id],
     queryFn: async () => {
-      // Only proceed if user is properly authenticated
-      if (!isAuthenticated || !user?.id || profile?.tipo_usuario !== 'therapist') {
-        return { hasProfile: false, isTherapist: false };
+      // Only proceed if user is properly authenticated and is the current user
+      if (!isAuthenticated || !user?.id || profile?.tipo_usuario !== 'therapist' || user.id !== profile.id) {
+        return { hasProfile: false, isTherapist: profile?.tipo_usuario === 'therapist' };
       }
 
       console.log('Checking therapist profile for authenticated user:', user.id);
@@ -28,10 +28,10 @@ export const useTherapistProfileCheck = () => {
       }
 
       const hasProfile = !!data;
-      console.log('Therapist profile check result:', { hasProfile, isTherapist: true });
+      console.log('Therapist profile check result:', { hasProfile, isTherapist: true, userId: user.id });
       
       return { hasProfile, isTherapist: true };
     },
-    enabled: !!user?.id && profile?.tipo_usuario === 'therapist' && isAuthenticated,
+    enabled: !!user?.id && profile?.tipo_usuario === 'therapist' && isAuthenticated && user.id === profile?.id,
   });
 };
