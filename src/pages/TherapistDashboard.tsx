@@ -1,10 +1,15 @@
+
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, Users, DollarSign, MessageCircle, LogOut, User } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LogOut, User, Calendar, Users, DollarSign, Bell } from 'lucide-react';
 import { getPersonalizedGreeting } from '@/utils/greetingUtils';
 import { useNavigate } from 'react-router-dom';
+import DashboardStatsCards from '@/components/dashboard/DashboardStatsCards';
+import TherapistCalendar from '@/components/dashboard/TherapistCalendar';
+import ClientsList from '@/components/dashboard/ClientsList';
+import FinancialSummary from '@/components/dashboard/FinancialSummary';
 
 const TherapistDashboard = () => {
   const { profile, logout } = useAuth();
@@ -51,119 +56,106 @@ const TherapistDashboard = () => {
             </p>
           </div>
           
-          {/* Botão de Logout Visível */}
-          <Button
-            variant="outline"
-            onClick={handleLogout}
-            className="flex items-center gap-2 text-gray-700 hover:text-red-600 hover:border-red-300 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            <span className="hidden sm:inline">Sair</span>
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm">
+              <Bell className="w-4 h-4 mr-2" />
+              Notificações
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-gray-700 hover:text-red-600 hover:border-red-300 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Sair</span>
+            </Button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Sessões Hoje
-              </CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                Nenhuma sessão agendada
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Pacientes Ativos
-              </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                Nenhum paciente ativo
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Receita do Mês
-              </CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">R$ 0</div>
-              <p className="text-xs text-muted-foreground">
-                Nenhuma receita este mês
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Mensagens
-              </CardTitle>
-              <MessageCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                Nenhuma mensagem nova
-              </p>
-            </CardContent>
-          </Card>
+        {/* Cards de Estatísticas */}
+        <div className="mb-8">
+          <DashboardStatsCards />
         </div>
 
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Próximas Sessões</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-center py-8">
-                Nenhuma sessão agendada para hoje
-              </p>
-            </CardContent>
-          </Card>
+        {/* Conteúdo Principal com Abas */}
+        <Tabs defaultValue="agenda" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
+            <TabsTrigger value="agenda" className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              <span className="hidden sm:inline">Agenda</span>
+            </TabsTrigger>
+            <TabsTrigger value="pacientes" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              <span className="hidden sm:inline">Pacientes</span>
+            </TabsTrigger>
+            <TabsTrigger value="financeiro" className="flex items-center gap-2">
+              <DollarSign className="w-4 h-4" />
+              <span className="hidden sm:inline">Financeiro</span>
+            </TabsTrigger>
+            <TabsTrigger value="perfil" className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              <span className="hidden sm:inline">Perfil</span>
+            </TabsTrigger>
+          </TabsList>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Ações Rápidas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start">
-                <Calendar className="w-4 h-4 mr-2" />
-                Ver Agenda
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Users className="w-4 h-4 mr-2" />
-                Gerenciar Pacientes
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Mensagens
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full justify-start"
-                onClick={handleEditProfile}
-              >
-                <User className="w-4 h-4 mr-2" />
-                Editar Perfil Profissional
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+          <TabsContent value="agenda" className="space-y-6">
+            <TherapistCalendar />
+          </TabsContent>
+
+          <TabsContent value="pacientes" className="space-y-6">
+            <ClientsList />
+          </TabsContent>
+
+          <TabsContent value="financeiro" className="space-y-6">
+            <FinancialSummary />
+          </TabsContent>
+
+          <TabsContent value="perfil" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-white p-6 rounded-lg border">
+                <h3 className="text-lg font-semibold mb-4">Ações Rápidas</h3>
+                <div className="space-y-3">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={handleEditProfile}
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Editar Perfil Profissional
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Gerenciar Disponibilidade
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
+                    <Bell className="w-4 h-4 mr-2" />
+                    Configurar Notificações
+                  </Button>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg border">
+                <h3 className="text-lg font-semibold mb-4">Informações do Perfil</h3>
+                <div className="space-y-3 text-sm">
+                  <div>
+                    <span className="font-medium text-gray-600">Nome:</span>
+                    <p className="text-gray-900">{profile?.nome || 'Não informado'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">Email:</span>
+                    <p className="text-gray-900">{profile?.email || 'Não informado'}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-600">Tipo de Usuário:</span>
+                    <p className="text-gray-900 capitalize">
+                      {profile?.tipo_usuario === 'therapist' ? 'Terapeuta' : 'Cliente'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
