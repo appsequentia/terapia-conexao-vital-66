@@ -7,7 +7,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, User, MapPin } from 'lucide-react';
+import { Calendar, Clock, User, MapPin, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -20,6 +20,7 @@ interface BookingConfirmationModalProps {
   selectedDate: Date;
   selectedTime: string;
   sessionType: 'online' | 'in-person';
+  sessionPrice?: number;
   isLoading?: boolean;
 }
 
@@ -32,6 +33,7 @@ export const BookingConfirmationModal = ({
   selectedDate,
   selectedTime,
   sessionType,
+  sessionPrice,
   isLoading = false,
 }: BookingConfirmationModalProps) => {
   const formatDate = (date: Date) => {
@@ -40,6 +42,14 @@ export const BookingConfirmationModal = ({
 
   const getSessionTypeLabel = (type: 'online' | 'in-person') => {
     return type === 'online' ? 'Online' : 'Presencial';
+  };
+
+  const formatPrice = (price?: number) => {
+    if (!price) return 'Valor a combinar';
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(price);
   };
 
   return (
@@ -89,6 +99,16 @@ export const BookingConfirmationModal = ({
               </p>
             </div>
           </div>
+
+          <div className="flex items-center space-x-3">
+            <DollarSign className="h-5 w-5 text-primary" />
+            <div>
+              <p className="font-medium">Valor da Sessão</p>
+              <p className="text-sm text-muted-foreground font-semibold">
+                {formatPrice(sessionPrice)}
+              </p>
+            </div>
+          </div>
         </div>
         
         <DialogFooter className="flex-col sm:flex-row gap-2">
@@ -105,7 +125,7 @@ export const BookingConfirmationModal = ({
             className="w-full sm:w-auto"
             disabled={isLoading}
           >
-            {isLoading ? 'Confirmando...' : 'Confirmar Agendamento'}
+            {isLoading ? 'Processando...' : 'Continuar para Pagamento'}
           </Button>
         </DialogFooter>
       </DialogContent>

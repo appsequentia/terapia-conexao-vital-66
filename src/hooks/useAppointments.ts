@@ -77,6 +77,8 @@ export const useCreateAppointment = () => {
       const appointmentData = {
         ...data,
         client_id: user.id,
+        status: 'scheduled', // Criar como agendado, será confirmado após pagamento
+        payment_status: 'pending', // Pendente até o pagamento
       };
 
       const { data: result, error } = await supabase
@@ -109,15 +111,15 @@ export const useCreateAppointment = () => {
       });
       
       toast({
-        title: 'Agendamento realizado!',
-        description: 'Sua consulta foi agendada com sucesso.',
+        title: 'Agendamento criado!',
+        description: 'Prossiga para o pagamento para confirmar sua consulta.',
       });
     },
     onError: (error) => {
       console.error('Error creating appointment:', error);
       toast({
         title: 'Erro ao agendar',
-        description: 'Não foi possível realizar o agendamento. Tente novamente.',
+        description: 'Não foi possível criar o agendamento. Tente novamente.',
         variant: 'destructive',
       });
     },

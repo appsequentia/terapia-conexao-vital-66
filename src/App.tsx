@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +19,9 @@ import TherapistProfile from "./pages/TherapistProfile";
 import NotFound from "./pages/NotFound";
 import TherapistDetail from "./pages/TherapistDetail";
 import BookingPage from "./pages/BookingPage";
+import PaymentMethodPage from "./pages/PaymentMethodPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +44,23 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/payment-method/:appointmentId" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <PaymentMethodPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/checkout/:appointmentId/:method" 
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <CheckoutPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/payment-success" element={<PaymentSuccessPage />} />
             <Route path="/como-funciona" element={<HowItWorks />} />
             <Route path="/para-terapeutas" element={<ParaTerapeutas />} />
             <Route 

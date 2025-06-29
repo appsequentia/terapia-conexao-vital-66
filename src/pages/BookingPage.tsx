@@ -86,7 +86,6 @@ const BookingPage = () => {
       let currentTime = startTime;
       while (currentTime < endTime) {
         const timeString = format(currentTime, 'HH:mm');
-        const endTimeString = format(addMinutes(currentTime, 60), 'HH:mm');
         
         // Check if this time slot is already booked
         const isBooked = appointments?.some(appointment => 
@@ -115,17 +114,23 @@ const BookingPage = () => {
 
     const endTime = format(addMinutes(parseISO(`2000-01-01T${selectedTime}`), 60), 'HH:mm');
 
-    await createAppointmentMutation.mutateAsync({
-      therapist_id: id!,
-      appointment_date: format(selectedDate, 'yyyy-MM-dd'),
-      start_time: selectedTime,
-      end_time: endTime,
-      session_type: sessionType,
-    });
+    try {
+      const appointment = await createAppointmentMutation.mutateAsync({
+        therapist_id: id!,
+        appointment_date: format(selectedDate, 'yyyy-MM-dd'),
+        start_time: selectedTime,
+        end_time: endTime,
+        session_type: sessionType,
+      });
 
-    setShowConfirmation(false);
-    setSelectedTime(undefined);
-    navigate('/dashboard-cliente');
+      setShowConfirmation(false);
+      setSelectedTime(undefined);
+      
+      // Redirecionar para seleção de método de pagamento
+      navigate(`/payment-method/${appointment.id}`);
+    } catch (error) {
+      console.error('Erro ao criar agendamento:', error);
+    }
   };
 
   const timeSlots = generateTimeSlots();
@@ -239,6 +244,7 @@ const BookingPage = () => {
         selectedDate={selectedDate!}
         selectedTime={selectedTime!}
         sessionType={sessionType}
+        sessionPrice={therapist.pricePerSession}
         isLoading={createAppointmentMutation.isPending}
       />
     </div>
