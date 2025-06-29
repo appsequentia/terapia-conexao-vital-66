@@ -56,33 +56,37 @@
   - [x] Botão "Aplicar Filtros"
   - [x] Cards redirecionam para perfil público
 
-- [ ] **Tela de Agendamento**
-  - [ ] Calendário mensal para seleção de datas
-  - [ ] Lista de horários disponíveis
-  - [ ] Modal de confirmação com resumo
-  - [ ] Horários indisponíveis desabilitados
+- [x] **Tela de Agendamento**
+  - [x] Calendário mensal para seleção de datas
+  - [x] Lista de horários disponíveis
+  - [x] Modal de confirmação com resumo
+  - [x] Horários indisponíveis desabilitados
 
 ## 4. Telas de Pagamento
 
-- [ ] **Tela de Seleção de Método de Pagamento**
-  - [ ] Opções: Cartão de crédito, PIX, Boleto
-  - [ ] Botão "Continuar"
+- [x] **Tela de Seleção de Método de Pagamento**
+  - [x] Opções: Cartão de Crédito, PIX, Boleto
+  - [x] Resumo do pedido (valor, serviço)
 
-- [ ] **Tela de Checkout (Cartão)**
-  - [ ] Formulário com dados do cartão
-  - [ ] Checkbox "Salvar cartão"
-  - [ ] Botão "Pagar"
+- [x] **Tela de Checkout (Cartão)**
+  - [x] Formulário seguro para dados do cartão (usar Stripe/Pagar.me)
+  - [x] Validação de dados em tempo real
+  - [ ] Opção de salvar cartão para futuras compras (a implementar)
+
+- [x] **Tela de Sucesso/Falha no Pagamento**
+  - [x] Mensagem clara de status
+  - [x] Redirecionamento para dashboard ou página de agendamentos
 
 ## 5. Telas de Comunicação
 
-- [ ] **Tela de Chat**
-  - [ ] Header com nome e status do terapeuta
-  - [ ] Lista de mensagens
-  - [ ] Input de mensagem + botão de envio
+- [x] **Tela de Chat**
+  - [x] Header com nome e status do terapeuta
+  - [x] Lista de mensagens
+  - [x] Input de mensagem + botão de envio
 
-- [ ] **Tela de Vídeo Chamada**
-  - [ ] Janela de vídeo (WebRTC)
-  - [ ] Controles: Microfone, Câmera, Encerrar
+- [x] **Tela de Vídeo Chamada**
+  - [x] Janela de vídeo (WebRTC)
+  - [x] Controles: Microfone, Câmera, Encerrar
 
 ## 6. Dashboards
 

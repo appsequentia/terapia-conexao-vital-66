@@ -138,7 +138,11 @@ const TherapistDetail = () => {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <Button size="lg" className="flex-1 hover-scale">
+                  <Button 
+                    size="lg" 
+                    className="flex-1 hover-scale"
+                    onClick={() => navigate(`/agendar/${therapist.id}`)}
+                  >
                     <Calendar className="h-4 w-4 mr-2" />
                     Agendar Consulta
                   </Button>

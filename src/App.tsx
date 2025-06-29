@@ -18,6 +18,12 @@ import TherapistDashboard from "./pages/TherapistDashboard";
 import TherapistProfile from "./pages/TherapistProfile";
 import NotFound from "./pages/NotFound";
 import TherapistDetail from "./pages/TherapistDetail";
+import SchedulingPage from "./pages/SchedulingPage";
+import PaymentMethodPage from "./pages/PaymentMethodPage";
+import CreditCardCheckoutPage from "./pages/CreditCardCheckoutPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import ChatPage from "./pages/ChatPage";
+import VideoCallPage from "./pages/VideoCallPage";
 
 const queryClient = new QueryClient();
 
@@ -98,7 +104,55 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route 
+              path="/agendar/:terapeutaId"
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <SchedulingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/selecionar-pagamento"
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <PaymentMethodPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/checkout/credit-card"
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <CreditCardCheckoutPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/payment-success"
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <PaymentSuccessPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/chat/:chatId"
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <ChatPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/video-call/:roomId"
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <VideoCallPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL \"*\" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>
