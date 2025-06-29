@@ -46,7 +46,16 @@ export const useAppointments = (therapistId: string, date: string) => {
       }
 
       console.log('Appointments data:', data);
-      return data || [];
+      
+      // Type cast the data to match our interface
+      const typedData: Appointment[] = (data || []).map(appointment => ({
+        ...appointment,
+        session_type: appointment.session_type as 'online' | 'in-person',
+        status: appointment.status as 'scheduled' | 'confirmed' | 'completed' | 'cancelled',
+        payment_status: appointment.payment_status as 'pending' | 'paid' | 'refunded'
+      }));
+      
+      return typedData;
     },
     enabled: !!therapistId && !!date,
   });
@@ -82,7 +91,16 @@ export const useCreateAppointment = () => {
       }
 
       console.log('Appointment created successfully:', result);
-      return result;
+      
+      // Type cast the result to match our interface
+      const typedResult: Appointment = {
+        ...result,
+        session_type: result.session_type as 'online' | 'in-person',
+        status: result.status as 'scheduled' | 'confirmed' | 'completed' | 'cancelled',
+        payment_status: result.payment_status as 'pending' | 'paid' | 'refunded'
+      };
+      
+      return typedResult;
     },
     onSuccess: (data) => {
       // Invalidate and refetch appointments

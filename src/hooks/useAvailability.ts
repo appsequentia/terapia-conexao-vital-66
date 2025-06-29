@@ -32,7 +32,14 @@ export const useAvailability = (therapistId: string) => {
       }
 
       console.log('Availability data:', data);
-      return data || [];
+      
+      // Type cast the data to match our interface
+      const typedData: AvailabilitySlot[] = (data || []).map(slot => ({
+        ...slot,
+        session_type: slot.session_type as 'online' | 'in-person' | 'both'
+      }));
+      
+      return typedData;
     },
     enabled: !!therapistId,
   });
