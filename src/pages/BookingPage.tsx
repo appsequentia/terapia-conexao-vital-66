@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import Header from '@/components/Header';
 const BookingPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isAuthenticated } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>();
@@ -32,6 +33,29 @@ const BookingPage = () => {
     selectedDate ? format(selectedDate, 'yyyy-MM-dd') : ''
   );
   const createAppointmentMutation = useCreateAppointment();
+
+  // Processar query parameters para auto-seleção de data e hora
+  useEffect(() => {
+    const dateParam = searchParams.get('date');
+    const timeParam = searchParams.get('time');
+
+    console.log('Query parameters:', { dateParam, timeParam });
+
+    if (dateParam) {
+      try {
+        const parsedDate = parseISO(dateParam);
+        setSelectedDate(parsedDate);
+        console.log('Auto-selected date:', parsedDate);
+      } catch (error) {
+        console.error('Error parsing date parameter:', error);
+      }
+    }
+
+    if (timeParam) {
+      setSelectedTime(timeParam);
+      console.log('Auto-selected time:', timeParam);
+    }
+  }, [searchParams]);
 
   console.log('BookingPage - Therapist data:', therapist);
   console.log('BookingPage - Availability data:', availability);

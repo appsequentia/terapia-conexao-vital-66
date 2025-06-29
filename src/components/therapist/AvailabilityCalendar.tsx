@@ -1,3 +1,4 @@
+
 // src/components/therapist/AvailabilityCalendar.tsx
 
 import { useState, useMemo } from 'react';
@@ -62,7 +63,8 @@ export function AvailabilityCalendar() {
 
   const handleTimeSlotClick = (date: Date, time: string) => {
     const formattedDate = format(date, 'yyyy-MM-dd');
-    navigate(`/agendamento?therapistId=${therapistId}&date=${formattedDate}&time=${time}`);
+    // Usar a rota correta com o ID do terapeuta e query parameters para data e hora
+    navigate(`/agendamento/${therapistId}?date=${formattedDate}&time=${time}`);
   };
 
   return (
