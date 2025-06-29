@@ -4,16 +4,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const useTherapistProfileCheck = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, isAuthenticated } = useAuth();
 
   return useQuery({
     queryKey: ['therapist-profile-check', user?.id],
     queryFn: async () => {
-      if (!user?.id || profile?.tipo_usuario !== 'therapist') {
+      // Only proceed if user is properly authenticated
+      if (!isAuthenticated || !user?.id || profile?.tipo_usuario !== 'therapist') {
         return { hasProfile: false, isTherapist: false };
       }
 
-      console.log('Checking therapist profile for user:', user.id);
+      console.log('Checking therapist profile for authenticated user:', user.id);
       
       const { data, error } = await supabase
         .from('terapeutas')
@@ -31,6 +32,6 @@ export const useTherapistProfileCheck = () => {
       
       return { hasProfile, isTherapist: true };
     },
-    enabled: !!user?.id && profile?.tipo_usuario === 'therapist',
+    enabled: !!user?.id && profile?.tipo_usuario === 'therapist' && isAuthenticated,
   });
 };

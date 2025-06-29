@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -52,12 +53,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [redirectTimeout, setRedirectTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [redirectAttempts, setRedirectAttempts] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
 
-  // Simplified authentication check - user must have valid session AND user object
-  const isAuthenticated = Boolean(session && user);
+  // Strict authentication check - user must have valid session AND user object
+  const isAuthenticated = Boolean(session && user && session.access_token);
 
   console.log('AuthContext - Current state:', {
     hasUser: !!user,
@@ -66,7 +68,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isAuthenticated,
     isLoading,
     userEmail: user?.email,
-    currentPath: location.pathname
+    currentPath: location.pathname,
+    redirectAttempts
   });
 
   // Enhanced function to check if user is in registration flow
@@ -87,10 +90,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const handleUserRedirect = async (user: User, profile: Profile) => {
+    // CRITICAL: Only proceed if user is actually authenticated
+    if (!isAuthenticated || !session?.access_token) {
+      console.log('AuthContext - User not properly authenticated, skipping redirect');
+      return;
+    }
+
+    // Prevent infinite loops with redirect attempts limit
+    if (redirectAttempts >= 3) {
+      console.log('AuthContext - Max redirect attempts reached, stopping redirects');
+      return;
+    }
+
     console.log('AuthContext - handleUserRedirect called:', {
       userType: profile.tipo_usuario,
       currentPath: location.pathname,
-      isInRegistrationFlow: isInRegistrationFlow()
+      isInRegistrationFlow: isInRegistrationFlow(),
+      redirectAttempts
     });
 
     // Don't redirect if user is already in registration flow
@@ -116,13 +132,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
         if (!therapistData) {
           console.log('AuthContext - Therapist profile incomplete, redirecting to setup');
+          setRedirectAttempts(prev => prev + 1);
+          
           // Clear any existing timeout
           if (redirectTimeout) {
             clearTimeout(redirectTimeout);
           }
+          
           // Set a timeout to prevent infinite loops
           const timeout = setTimeout(() => {
-            if (location.pathname !== '/completar-cadastro-terapeuta') {
+            if (location.pathname !== '/completar-cadastro-terapeuta' && isAuthenticated) {
               navigate('/completar-cadastro-terapeuta');
             }
           }, 100);
@@ -137,22 +156,29 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
     }
 
-    // Redirect to appropriate dashboard only if not already there
-    const dashboardPath = profile.tipo_usuario === 'therapist' 
-      ? '/dashboard-terapeuta' 
-      : '/dashboard-cliente';
-    
-    if (location.pathname !== dashboardPath && !isInRegistrationFlow()) {
-      console.log('AuthContext - Redirecting to dashboard:', dashboardPath);
-      // Clear any existing timeout
-      if (redirectTimeout) {
-        clearTimeout(redirectTimeout);
+    // Redirect to appropriate dashboard only if not already there and user is authenticated
+    if (isAuthenticated) {
+      const dashboardPath = profile.tipo_usuario === 'therapist' 
+        ? '/dashboard-terapeuta' 
+        : '/dashboard-cliente';
+      
+      if (location.pathname !== dashboardPath && !isInRegistrationFlow()) {
+        console.log('AuthContext - Redirecting to dashboard:', dashboardPath);
+        setRedirectAttempts(prev => prev + 1);
+        
+        // Clear any existing timeout
+        if (redirectTimeout) {
+          clearTimeout(redirectTimeout);
+        }
+        
+        // Set a timeout to prevent conflicts
+        const timeout = setTimeout(() => {
+          if (isAuthenticated) {
+            navigate(dashboardPath);
+          }
+        }, 100);
+        setRedirectTimeout(timeout);
       }
-      // Set a timeout to prevent conflicts
-      const timeout = setTimeout(() => {
-        navigate(dashboardPath);
-      }, 100);
-      setRedirectTimeout(timeout);
     }
   };
 
@@ -193,23 +219,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             console.log('AuthContext - Auth state changed:', event, {
               hasSession: !!session,
               userId: session?.user?.id,
-              currentPath: location.pathname
+              currentPath: location.pathname,
+              hasAccessToken: !!session?.access_token
             });
             
             // Always update session and user state immediately
             setSession(session);
             setUser(session?.user ?? null);
+            
+            // Reset redirect attempts on auth state change
+            setRedirectAttempts(0);
 
-            if (session?.user) {
-              console.log('AuthContext - User authenticated, fetching profile...');
+            if (session?.user && session?.access_token) {
+              console.log('AuthContext - Valid session detected, fetching profile...');
               // Defer profile fetching to avoid blocking UI
               setTimeout(async () => {
                 if (!mounted) return;
                 const userProfile = await fetchProfile(session.user.id);
                 if (mounted) {
                   setProfile(userProfile);
-                  if (userProfile) {
-                    // Only redirect if not in registration flow
+                  if (userProfile && session?.access_token) {
+                    // Only redirect if user is properly authenticated and not in registration flow
                     if (!isInRegistrationFlow()) {
                       await handleUserRedirect(session.user, userProfile);
                     }
@@ -217,9 +247,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
                 }
               }, 100);
             } else {
-              console.log('AuthContext - No user session, clearing profile');
+              console.log('AuthContext - No valid session, clearing profile');
               if (mounted) {
                 setProfile(null);
+                setRedirectAttempts(0);
               }
             }
           }
@@ -232,22 +263,23 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           console.log('AuthContext - Initial session check:', {
             hasSession: !!initialSession,
             userId: initialSession?.user?.id,
-            currentPath: location.pathname
+            currentPath: location.pathname,
+            hasAccessToken: !!initialSession?.access_token
           });
           
           setSession(initialSession);
           setUser(initialSession?.user ?? null);
 
-          if (initialSession?.user) {
-            console.log('AuthContext - Fetching profile for initial session...');
+          if (initialSession?.user && initialSession?.access_token) {
+            console.log('AuthContext - Fetching profile for initial valid session...');
             // Defer profile fetching for initial session too
             setTimeout(async () => {
               if (!mounted) return;
               const userProfile = await fetchProfile(initialSession.user.id);
               if (mounted) {
                 setProfile(userProfile);
-                if (userProfile) {
-                  // Only redirect if not in registration flow
+                if (userProfile && initialSession?.access_token) {
+                  // Only redirect if user is properly authenticated and not in registration flow
                   if (!isInRegistrationFlow()) {
                     await handleUserRedirect(initialSession.user, userProfile);
                   }

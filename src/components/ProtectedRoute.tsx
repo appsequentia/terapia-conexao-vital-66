@@ -14,7 +14,7 @@ const ProtectedRoute = ({
   requireAuth = true, 
   redirectTo = '/login' 
 }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading, profile } = useAuth();
+  const { isAuthenticated, isLoading, profile, session } = useAuth();
   const location = useLocation();
 
   console.log('ProtectedRoute - Path:', location.pathname, {
@@ -22,17 +22,19 @@ const ProtectedRoute = ({
     authenticated: isAuthenticated,
     requireAuth: requireAuth,
     hasProfile: !!profile,
-    userType: profile?.tipo_usuario
+    userType: profile?.tipo_usuario,
+    hasSession: !!session,
+    hasAccessToken: !!session?.access_token
   });
 
-  // Special handling for registration routes
+  // Special handling for registration routes - allow if authenticated
   const isRegistrationRoute = [
     '/completar-cadastro-terapeuta',
     '/perfil-terapeuta',
     '/editar-perfil-terapeuta'
   ].includes(location.pathname);
 
-  // Mostrar loading enquanto verifica autenticação
+  // Show loading while verifying authentication
   if (isLoading) {
     console.log('ProtectedRoute - Showing loading spinner for path:', location.pathname);
     return (
@@ -42,19 +44,26 @@ const ProtectedRoute = ({
     );
   }
 
-  // Se requer autenticação mas usuário não está autenticado
-  if (requireAuth && !isAuthenticated) {
-    console.log('ProtectedRoute - Redirecting to login, user not authenticated for path:', location.pathname);
+  // If authentication is required but user is not properly authenticated
+  if (requireAuth && (!isAuthenticated || !session?.access_token)) {
+    console.log('ProtectedRoute - Redirecting to login, user not properly authenticated for path:', location.pathname);
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // For registration routes, allow access if authenticated regardless of profile completeness
-  if (isRegistrationRoute && isAuthenticated) {
+  // For registration routes, allow access if properly authenticated
+  if (isRegistrationRoute && isAuthenticated && session?.access_token) {
     console.log('ProtectedRoute - Allowing access to registration route:', location.pathname);
     return <>{children}</>;
   }
 
-  // Renderizar children em todos os outros casos
+  // For non-auth routes (like login/register pages), redirect authenticated users away
+  if (!requireAuth && isAuthenticated && session?.access_token) {
+    console.log('ProtectedRoute - Authenticated user accessing non-auth route, allowing access');
+    // Don't auto-redirect from non-auth pages to avoid loops
+    return <>{children}</>;
+  }
+
+  // Render children in all other cases
   console.log('ProtectedRoute - Rendering children for path:', location.pathname);
   return <>{children}</>;
 };
