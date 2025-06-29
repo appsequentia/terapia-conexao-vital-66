@@ -33,7 +33,11 @@ const ProtectedRoute = ({
   ].includes(location.pathname);
 
   // Mostrar loading enquanto verifica autenticação
-  if (isLoading) {
+  // We must wait for the profile to be loaded for authenticated users on protected routes.
+  // The context's `isLoading` only covers session verification, not profile fetching.
+  const isProfilePending = requireAuth && isAuthenticated && !profile;
+
+  if (isLoading || isProfilePending) {
     console.log('ProtectedRoute - Showing loading spinner for path:', location.pathname);
     return (
       <div className="min-h-screen flex items-center justify-center">

@@ -20,9 +20,19 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Inicializa o Firebase
-const app = initializeApp(firebaseConfig);
+// Se a API KEY não estiver definida, evitamos iniciar o Firebase para não quebrar a aplicação em desenvolvimento
+const shouldInitFirebase = Boolean(firebaseConfig.apiKey);
 
-// Exporta os serviços do Firebase que serão utilizados
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+let app;
+
+if (shouldInitFirebase) {
+  app = initializeApp(firebaseConfig);
+  console.info('[Firebase] Inicializado com sucesso');
+} else {
+  console.warn('[Firebase] Variáveis de ambiente não configuradas. Firebase não será inicializado.');
+}
+
+// Exporta stubs seguros quando Firebase não está inicializado
+export const db = shouldInitFirebase ? getFirestore(app!) : (undefined as unknown as ReturnType<typeof getFirestore>);
+export const auth = shouldInitFirebase ? getAuth(app!) : (undefined as unknown as ReturnType<typeof getAuth>);
+

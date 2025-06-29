@@ -283,7 +283,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
       cleanup?.then(cleanupFn => cleanupFn?.());
     };
-  }, [navigate, location.pathname]);
+  }, [navigate]);
 
   const login = async (email: string, password: string) => {
     try {
