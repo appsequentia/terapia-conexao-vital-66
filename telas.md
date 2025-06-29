@@ -100,8 +100,8 @@
 
 - [x] **Dashboard do Terapeuta (`/dashboard/therapist`)**
   - [ ] **Resumo do Dia:** Cards com o número de sessões de hoje, novos clientes e faturamento do dia.
-  - [ ] **Agenda do Dia/Semana:** Visualização clara das sessões agendadas.
-  - [ ] **Gestão de Disponibilidade:** Acesso rápido para bloquear/desbloquear horários.
+  - [ ] **Agenda do Dia/Semana/mês:** Visualização clara das sessões agendadas, com opção de confirmação e enviar mensagem para o cliente.
+  - [ ] **Gestão de Disponibilidade:** Acesso rápido para bloquear/desbloquear horários, adicionar horario de atendimento e horario de almoço, opção de adicionar eventos diarios, semanais ou mensais.
   - [ ] **Resumo Financeiro:** Gráfico com faturamento mensal e saldo disponível para saque.
   - [ ] **Lista de Clientes:** Acesso rápido ao perfil e histórico dos clientes.
   - [ ] **Notificações:** Alertas sobre novos agendamentos, cancelamentos e mensagens.
