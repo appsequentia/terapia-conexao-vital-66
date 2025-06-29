@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Calendar } from '@/components/ui/calendar';
@@ -152,12 +151,10 @@ const BookingPage = () => {
 
   const timeSlots = generateTimeSlots();
 
-  // Preparar dados para o modal de confirmação
-  const therapistName = therapist.name || therapist.nome || 'Terapeuta';
-  const therapistSpecialties = therapist.specialties?.map(s => s.name) || 
-                              therapist.especialidades || 
-                              [];
-  const sessionPrice = therapist.pricePerSession || therapist.price_per_session || 0;
+  // Preparar dados para o modal de confirmação usando as propriedades corretas da interface TherapistProfile
+  const therapistName = therapist?.name || 'Terapeuta';
+  const therapistSpecialties = therapist?.specialties?.map(s => s.name) || [];
+  const sessionPrice = therapist?.pricePerSession || 0;
 
   console.log('Modal data:', {
     therapistName,
