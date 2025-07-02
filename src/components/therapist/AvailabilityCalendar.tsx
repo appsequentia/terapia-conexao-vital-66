@@ -10,33 +10,39 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useTherapistAvailability } from '@/hooks/useTherapistAvailability';
 
 interface AvailabilityData {
   [date: string]: string[];
 }
 
-// Função para gerar dados mockados dinamicamente para uma semana
-const generateMockAvailability = (start: Date): AvailabilityData => {
+// Mapeia os dias da semana (0 = domingo, 1 = segunda, etc.)
+const dayOfWeekMap = {
+  0: 0, // domingo
+  1: 1, // segunda
+  2: 2, // terça
+  3: 3, // quarta
+  4: 4, // quinta
+  5: 5, // sexta
+  6: 6, // sábado
+};
+
+// Converte availability slots para formato de calendário
+const convertSlotsToAvailability = (slots: any[], weekStart: Date): AvailabilityData => {
   const availability: AvailabilityData = {};
-  const possibleTimes = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
-
+  
   for (let i = 0; i < 7; i++) {
-    const date = addDays(start, i);
+    const date = addDays(weekStart, i);
     const dateString = format(date, 'yyyy-MM-dd');
+    const dayOfWeek = date.getDay();
     
-    // Não gera horários para Domingos
-    if (i === 0) {
-      availability[dateString] = [];
-      continue;
-    }
-
-    // Gera um número aleatório de horários para o dia
-    const numSlots = Math.floor(Math.random() * 5) + 1;
-    availability[dateString] = [...possibleTimes]
-      .sort(() => 0.5 - Math.random())
-      .slice(0, numSlots)
-      .sort();
+    // Filtra slots para o dia da semana atual
+    const daySlots = slots.filter(slot => slot.day_of_week === dayOfWeek);
+    
+    // Extrai apenas os horários de início
+    availability[dateString] = daySlots.map(slot => slot.start_time.substring(0, 5)); // Remove segundos se houver
   }
+  
   return availability;
 };
 
@@ -44,6 +50,8 @@ export function AvailabilityCalendar() {
   const { id: therapistId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
+  
+  const { data: availabilitySlots = [], isLoading } = useTherapistAvailability(therapistId || '');
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 }); // Semana começa no Domingo
 
@@ -51,7 +59,7 @@ export function AvailabilityCalendar() {
     return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   }, [weekStart]);
 
-  const availability = useMemo(() => generateMockAvailability(weekStart), [weekStart]);
+  const availability = useMemo(() => convertSlotsToAvailability(availabilitySlots, weekStart), [availabilitySlots, weekStart]);
 
   const handleNextWeek = () => {
     setCurrentDate(addDays(currentDate, 7));
@@ -84,7 +92,12 @@ export function AvailabilityCalendar() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="text-gray-500">Carregando horários...</div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4">
           {weekDays.map((day) => {
             const dateString = format(day, 'yyyy-MM-dd');
             const daySlots = availability[dateString] || [];
@@ -121,7 +134,8 @@ export function AvailabilityCalendar() {
               </div>
             );
           })}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
