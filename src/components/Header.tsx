@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTherapistData } from '@/hooks/useTherapistData';
 import { User, LogOut, Settings } from 'lucide-react';
 
 const Header = () => {
@@ -14,6 +15,7 @@ const Header = () => {
     logout,
     isLoading
   } = useAuth();
+  const { data: therapistData } = useTherapistData();
   const navigate = useNavigate();
   
   console.log('Header render - Auth state:', {
@@ -99,14 +101,26 @@ const Header = () => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/perfil')}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Meu Perfil</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/configuracoes')}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Configurações</span>
-                  </DropdownMenuItem>
+                  {profile.tipo_usuario === 'therapist' ? (
+                    <>
+                      <DropdownMenuItem 
+                        onClick={() => therapistData?.id && navigate(`/terapeuta/${therapistData.id}`)}
+                        disabled={!therapistData?.id}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Meu Perfil</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate('/editar-perfil-terapeuta')}>
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Configurações</span>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <DropdownMenuItem onClick={() => navigate('/perfil')}>
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Meu Perfil</span>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
