@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LogOut, User, Calendar, Users, DollarSign, Bell } from 'lucide-react';
 import { getPersonalizedGreeting } from '@/utils/greetingUtils';
 import { useNavigate } from 'react-router-dom';
+import { useTherapistProfileCheck } from '@/hooks/useTherapistProfileCheck';
 import DashboardStatsCards from '@/components/dashboard/DashboardStatsCards';
 import TherapistCalendar from '@/components/dashboard/TherapistCalendar';
 import ClientsList from '@/components/dashboard/ClientsList';
@@ -14,6 +15,9 @@ import FinancialSummary from '@/components/dashboard/FinancialSummary';
 const TherapistDashboard = () => {
   const { profile, logout } = useAuth();
   const navigate = useNavigate();
+  
+  // This hook automatically handles redirection if profile is incomplete
+  useTherapistProfileCheck();
 
   const handleLogout = async () => {
     try {

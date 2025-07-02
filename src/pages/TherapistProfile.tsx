@@ -180,24 +180,19 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
     }
   }, [existingData, dataLoading, isFirstTimeSetup, reset]);
 
-  // Simplified authentication check - remove redundant redirects
+  // Simplified authentication check - only validate user type, no redirects
   useEffect(() => {
     console.log('TherapistProfile - Auth check:', {
       authLoading,
       hasUser: !!user,
       hasProfile: !!profile,
-      userType: profile?.tipo_usuario
+      userType: profile?.tipo_usuario,
+      currentPath: window.location.pathname
     });
 
-    // Only check basic authentication, don't redirect
-    if (!authLoading && !user) {
-      console.log('TherapistProfile - No user, redirecting to login');
-      navigate('/login');
-      return;
-    }
-
+    // Only check user type, let AuthContext and useTherapistProfileCheck handle redirections
     if (!authLoading && profile && profile.tipo_usuario !== 'therapist') {
-      console.log('TherapistProfile - User is not a therapist, redirecting to home');
+      console.log('TherapistProfile - User is not a therapist, showing error and redirecting');
       toast({
         title: 'Acesso negado',
         description: 'Esta página é apenas para terapeutas.',
@@ -208,7 +203,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
     }
 
     console.log('TherapistProfile - Auth check passed, user can access this page');
-  }, [user, profile, authLoading, navigate, toast]);
+  }, [profile, authLoading, navigate, toast]);
 
   // Função para voltar ao dashboard
   const handleBackToDashboard = () => {

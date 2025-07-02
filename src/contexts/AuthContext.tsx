@@ -128,47 +128,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       profileId: profile.id
     });
 
-    // CRITICAL: Only check therapist profile for therapists, and only for the current user
-    if (profile.tipo_usuario === 'therapist' && user.id === profile.id) {
-      try {
-        console.log('AuthContext - Checking therapist profile completion for user:', user.id);
-        const { data: therapistData, error } = await supabase
-          .from('terapeutas')
-          .select('id')
-          .eq('user_id', user.id)
-          .maybeSingle();
-
-        if (error) {
-          console.error('AuthContext - Error checking therapist profile:', error);
-          return;
-        }
-
-        // Only redirect if therapist profile is incomplete
-        if (!therapistData) {
-          console.log('AuthContext - Therapist profile incomplete, redirecting to setup');
-          if (location.pathname !== '/completar-cadastro-terapeuta') {
-            navigate('/completar-cadastro-terapeuta');
-          }
-          return;
-        }
-
-        console.log('AuthContext - Therapist profile complete');
-      } catch (error) {
-        console.error('AuthContext - Error checking therapist profile:', error);
-        return;
-      }
-    }
-
-    // Only redirect to dashboard if user is not on a public route and not in registration flow
-    if (isAuthenticated && !isPublicRoute() && !isInRegistrationFlow()) {
-      const dashboardPath = profile.tipo_usuario === 'therapist' 
-        ? '/dashboard-terapeuta' 
-        : '/dashboard-cliente';
-      
-      if (location.pathname !== dashboardPath) {
-        console.log('AuthContext - Redirecting to dashboard:', dashboardPath);
+    // For clients, redirect to dashboard if not already there
+    if (profile.tipo_usuario === 'client') {
+      const dashboardPath = '/dashboard-cliente';
+      if (location.pathname !== dashboardPath && !isPublicRoute() && !isInRegistrationFlow()) {
+        console.log('AuthContext - Redirecting client to dashboard:', dashboardPath);
         navigate(dashboardPath);
       }
+      return;
+    }
+
+    // For therapists, let the useTherapistProfileCheck hook handle the redirection logic
+    // This prevents double checking and race conditions
+    if (profile.tipo_usuario === 'therapist') {
+      console.log('AuthContext - Therapist user detected, letting profile check hook handle redirection');
+      return;
     }
   };
 
