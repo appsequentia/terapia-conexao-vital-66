@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAvailability, AvailabilitySlot } from '@/hooks/useAvailability';
-import { useAuth } from '@/contexts/AuthContext';
+import { useTherapistData } from '@/hooks/useTherapistData';
 import { useToast } from '@/hooks/use-toast';
 
 export interface NewTimeSlot {
@@ -13,13 +13,13 @@ export interface NewTimeSlot {
 }
 
 export const useAvailabilityManager = () => {
-  const { profile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
-
-  // Get therapist ID from profile or context
-  const therapistId = profile?.id; // This might need adjustment based on your data structure
+  
+  // Get therapist data to get the correct therapist ID
+  const { data: therapistData } = useTherapistData();
+  const therapistId = therapistData?.id;
 
   const { data: availabilitySlots, isLoading: slotsLoading } = useAvailability(therapistId || '');
 
