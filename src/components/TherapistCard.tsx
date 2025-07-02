@@ -140,7 +140,7 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
             </div>
             <div className="flex items-center">
               <Clock className="h-4 w-4 mr-1" />
-              {therapistExperience} anos de experiência
+              {therapistExperience} anos de duração da terapia
             </div>
             {therapist.location?.offersOnline && (
               <div className="flex items-center">

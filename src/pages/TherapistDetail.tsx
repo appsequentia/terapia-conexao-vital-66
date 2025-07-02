@@ -129,7 +129,7 @@ const TherapistDetail = () => {
                     </div>
                     <div className="flex items-center text-gray-600">
                       <Clock className="h-4 w-4 mr-1" />
-                      {therapist.experience} anos de experiência
+                      {therapist.experience} anos de duração da terapia
                     </div>
                   </div>
                   

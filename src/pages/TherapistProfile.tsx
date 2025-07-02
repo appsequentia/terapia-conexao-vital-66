@@ -63,7 +63,7 @@ const therapistProfileSchema = z.object({
   bio: z.string().min(50, 'A descrição deve ter pelo menos 50 caracteres'),
   cidade: z.string().min(2, 'Informe a cidade de atendimento'),
   estado: z.string().min(2, 'Selecione o estado'),
-  experience: z.number().min(0, 'Informe os anos de experiência'),
+  experience: z.number().min(0, 'Informe a duração da terapia'),
   offersOnline: z.boolean(),
   offersInPerson: z.boolean(),
   formations: z.array(z.object({
@@ -514,7 +514,7 @@ const TherapistProfile: React.FC<TherapistProfileProps> = ({ isFirstTimeSetup = 
               {/* Experiência e Valor */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="experience">Anos de Experiência *</Label>
+                  <Label htmlFor="experience">Duração da terapia *</Label>
                   <Input
                     id="experience"
                     type="number"
