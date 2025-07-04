@@ -38,8 +38,7 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
 
   const handleSchedule = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // TODO: Implement scheduling functionality
-    navigate(`/terapeuta/${therapist.id}`);
+    navigate(`/agendamento/${therapist.id}`);
   };
 
   // Safe fallback for missing data
