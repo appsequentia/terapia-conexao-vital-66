@@ -12,6 +12,7 @@ import TherapistCalendar from '@/components/dashboard/TherapistCalendar';
 import ClientsList from '@/components/dashboard/ClientsList';
 import FinancialSummary from '@/components/dashboard/FinancialSummary';
 import AvailabilityManager from '@/components/availability/AvailabilityManager';
+import { EventManager } from '@/components/availability/EventManager';
 
 const TherapistDashboard = () => {
   const { profile, logout } = useAuth();
@@ -113,6 +114,7 @@ const TherapistDashboard = () => {
 
           <TabsContent value="disponibilidade" className="space-y-6">
             <AvailabilityManager />
+            <EventManager />
           </TabsContent>
 
           <TabsContent value="pacientes" className="space-y-6">

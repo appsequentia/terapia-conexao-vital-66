@@ -65,6 +65,60 @@ export type Database = {
           },
         ]
       }
+      availability_events: {
+        Row: {
+          created_at: string
+          days_of_week: number[] | null
+          description: string | null
+          end_date: string | null
+          end_time: string | null
+          event_type: string
+          id: string
+          is_active: boolean
+          month_pattern: Json | null
+          recurrence_type: string | null
+          start_date: string
+          start_time: string | null
+          therapist_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          days_of_week?: number[] | null
+          description?: string | null
+          end_date?: string | null
+          end_time?: string | null
+          event_type: string
+          id?: string
+          is_active?: boolean
+          month_pattern?: Json | null
+          recurrence_type?: string | null
+          start_date: string
+          start_time?: string | null
+          therapist_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          days_of_week?: number[] | null
+          description?: string | null
+          end_date?: string | null
+          end_time?: string | null
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          month_pattern?: Json | null
+          recurrence_type?: string | null
+          start_date?: string
+          start_time?: string | null
+          therapist_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       availability_slots: {
         Row: {
           created_at: string
@@ -109,6 +163,51 @@ export type Database = {
           },
         ]
       }
+      holidays: {
+        Row: {
+          blocks_appointments: boolean
+          city_code: string | null
+          country_code: string | null
+          created_at: string
+          date: string
+          id: string
+          is_active: boolean
+          is_recurring: boolean
+          month_day: string | null
+          name: string
+          state_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          blocks_appointments?: boolean
+          city_code?: string | null
+          country_code?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          is_active?: boolean
+          is_recurring?: boolean
+          month_day?: string | null
+          name: string
+          state_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          blocks_appointments?: boolean
+          city_code?: string | null
+          country_code?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          is_active?: boolean
+          is_recurring?: boolean
+          month_day?: string | null
+          name?: string
+          state_code?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -138,6 +237,45 @@ export type Database = {
           id?: string
           nome?: string
           tipo_usuario?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      schedule_settings: {
+        Row: {
+          allow_back_to_back: boolean
+          break_between_sessions: number
+          created_at: string
+          default_session_duration: number
+          id: string
+          max_advance_days: number
+          min_advance_hours: number
+          therapist_id: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          allow_back_to_back?: boolean
+          break_between_sessions?: number
+          created_at?: string
+          default_session_duration?: number
+          id?: string
+          max_advance_days?: number
+          min_advance_hours?: number
+          therapist_id: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          allow_back_to_back?: boolean
+          break_between_sessions?: number
+          created_at?: string
+          default_session_duration?: number
+          id?: string
+          max_advance_days?: number
+          min_advance_hours?: number
+          therapist_id?: string
+          timezone?: string
           updated_at?: string
         }
         Relationships: []
