@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Header from '@/components/Header';
 import { Button } from '@/components/ui/button';
@@ -13,10 +14,13 @@ import ClientsList from '@/components/dashboard/ClientsList';
 import FinancialSummary from '@/components/dashboard/FinancialSummary';
 import AvailabilityManager from '@/components/availability/AvailabilityManager';
 import { EventManager } from '@/components/availability/EventManager';
+import { useToast } from '@/hooks/use-toast';
 
 const TherapistDashboard = () => {
   const { profile, logout } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState('agenda');
   
   // This hook automatically handles redirection if profile is incomplete
   useTherapistProfileCheck();
@@ -45,6 +49,17 @@ const TherapistDashboard = () => {
     } catch (error) {
       console.error('TherapistDashboard - Navigation error:', error);
     }
+  };
+
+  const handleManageAvailability = () => {
+    setActiveTab('disponibilidade');
+  };
+
+  const handleConfigureNotifications = () => {
+    toast({
+      title: "Configurações de Notificação",
+      description: "Esta funcionalidade estará disponível em breve. Você será notificado sobre novos agendamentos e mensagens.",
+    });
   };
 
   return (
@@ -84,7 +99,7 @@ const TherapistDashboard = () => {
         </div>
 
         {/* Conteúdo Principal com Abas */}
-        <Tabs defaultValue="agenda" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:grid-cols-5">
             <TabsTrigger value="agenda" className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
@@ -138,11 +153,19 @@ const TherapistDashboard = () => {
                     <User className="w-4 h-4 mr-2" />
                     Editar Perfil Profissional
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={handleManageAvailability}
+                  >
                     <Calendar className="w-4 h-4 mr-2" />
                     Gerenciar Disponibilidade
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={handleConfigureNotifications}
+                  >
                     <Bell className="w-4 h-4 mr-2" />
                     Configurar Notificações
                   </Button>
