@@ -4,12 +4,14 @@ import Header from '@/components/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, User, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import NextSessionCard from '@/components/dashboard/NextSessionCard';
 import FutureAppointmentsList from '@/components/dashboard/FutureAppointmentsList';
 import SessionHistory from '@/components/dashboard/SessionHistory';
 
 const ClientDashboard = () => {
   const { profile } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,7 +74,7 @@ const ClientDashboard = () => {
               <p className="text-gray-600">
                 Encontre o terapeuta ideal para suas necessidades e comece sua jornada de bem-estar.
               </p>
-              <Button className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto" onClick={() => navigate('/encontrar-terapeutas')}>
                 <Search className="w-4 h-4 mr-2" />
                 Encontrar Terapeutas
               </Button>

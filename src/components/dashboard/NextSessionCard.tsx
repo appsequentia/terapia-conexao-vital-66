@@ -7,9 +7,15 @@ import { useNextAppointment } from '@/hooks/useClientAppointments';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useNavigate } from 'react-router-dom';
 
 const NextSessionCard = () => {
   const { data: nextAppointment, isLoading, error } = useNextAppointment();
+  const navigate = useNavigate();
+
+  const handleScheduleClick = () => {
+    navigate('/encontrar-terapeutas');
+  };
 
   if (isLoading) {
     return (
@@ -67,7 +73,7 @@ const NextSessionCard = () => {
             <p className="text-sm text-muted-foreground">
               Nenhuma sessão agendada
             </p>
-            <Button size="sm" className="w-full">
+            <Button size="sm" className="w-full" onClick={handleScheduleClick}>
               Agendar Sessão
             </Button>
           </div>
