@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, User, Search } from 'lucide-react';
 import NextSessionCard from '@/components/dashboard/NextSessionCard';
+import FutureAppointmentsList from '@/components/dashboard/FutureAppointmentsList';
+import SessionHistory from '@/components/dashboard/SessionHistory';
 
 const ClientDashboard = () => {
   const { profile } = useAuth();
@@ -57,7 +59,11 @@ const ClientDashboard = () => {
           </Card>
         </div>
 
-        <div className="mt-8">
+        <div className="space-y-8 mt-8">
+          <FutureAppointmentsList />
+          
+          <SessionHistory />
+          
           <Card>
             <CardHeader>
               <CardTitle>Comece sua jornada</CardTitle>
