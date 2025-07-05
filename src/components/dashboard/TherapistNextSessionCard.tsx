@@ -124,17 +124,13 @@ const TherapistNextSessionCard = () => {
         {/* Patient Info */}
         <div className="flex items-center space-x-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage 
-              src={nextAppointment.profiles?.avatar_url} 
-              alt={nextAppointment.profiles?.nome} 
-            />
             <AvatarFallback>
               <User className="h-4 w-4" />
             </AvatarFallback>
           </Avatar>
           <div>
             <p className="text-sm font-medium">
-              {nextAppointment.profiles?.nome || 'Paciente'}
+              {nextAppointment.client_name || 'Paciente'}
             </p>
             <p className="text-xs text-muted-foreground">
               Paciente
