@@ -39,14 +39,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/encontrar-terapeutas" element={<FindTherapists />} />
             <Route path="/terapeuta/:id" element={<TherapistDetail />} />
-            <Route 
-              path="/agendamento/:id" 
-              element={
-                <ProtectedRoute requireAuth={true}>
-                  <BookingPage />
-                </ProtectedRoute>
-              } 
-            />
+            <Route path="/agendamento/:id" element={<BookingPage />} />
             <Route 
               path="/payment-method/:appointmentId" 
               element={

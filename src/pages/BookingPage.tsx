@@ -61,26 +61,6 @@ const BookingPage = () => {
   console.log('BookingPage - Availability data:', availability);
   console.log('BookingPage - Appointments data:', appointments);
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <Card className="max-w-md mx-auto">
-            <CardContent className="pt-6 text-center">
-              <p className="text-muted-foreground mb-4">
-                Você precisa estar logado para agendar uma consulta.
-              </p>
-              <Button onClick={() => navigate('/login')}>
-                Fazer Login
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
   if (therapistLoading || !therapist) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -140,6 +120,18 @@ const BookingPage = () => {
   const handleConfirmBooking = async () => {
     if (!selectedDate || !selectedTime || !therapist) {
       console.error('Missing required data for booking');
+      return;
+    }
+
+    // Check authentication at booking confirmation
+    if (!isAuthenticated) {
+      navigate('/login', { 
+        state: { 
+          from: `/agendamento/${id}`,
+          selectedDate: format(selectedDate, 'yyyy-MM-dd'),
+          selectedTime 
+        } 
+      });
       return;
     }
 
