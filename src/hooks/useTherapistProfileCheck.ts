@@ -52,7 +52,8 @@ export const useTherapistProfileCheck = () => {
     const registrationPaths = [
       '/completar-cadastro-terapeuta', 
       '/perfil-terapeuta',
-      '/editar-perfil-terapeuta'
+      '/editar-perfil-terapeuta',
+      '/agendamento'
     ];
     
     const isInRegistrationFlow = registrationPaths.includes(location.pathname);

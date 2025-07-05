@@ -64,6 +64,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     '/',
     '/encontrar-terapeutas',
     '/terapeuta',
+    '/agendamento',
     '/como-funciona',
     '/para-terapeutas',
     '/login',
