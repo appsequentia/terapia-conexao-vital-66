@@ -14,6 +14,7 @@ import ClientsList from '@/components/dashboard/ClientsList';
 import FinancialSummary from '@/components/dashboard/FinancialSummary';
 import AvailabilityManager from '@/components/availability/AvailabilityManager';
 import { EventManager } from '@/components/availability/EventManager';
+import TherapistNextSessionCard from '@/components/dashboard/TherapistNextSessionCard';
 import { useToast } from '@/hooks/use-toast';
 
 const TherapistDashboard = () => {
@@ -96,6 +97,11 @@ const TherapistDashboard = () => {
         {/* Cards de Estatísticas */}
         <div className="mb-8">
           <DashboardStatsCards />
+        </div>
+
+        {/* Card da Próxima Sessão */}
+        <div className="mb-8">
+          <TherapistNextSessionCard />
         </div>
 
         {/* Conteúdo Principal com Abas */}

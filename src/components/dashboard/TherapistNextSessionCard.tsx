@@ -4,19 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Clock, Video, MapPin, MessageCircle, User } from 'lucide-react';
-import { useNextAppointment } from '@/hooks/useClientAppointments';
+import { useTherapistAppointments } from '@/hooks/useTherapistAppointments';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useNavigate } from 'react-router-dom';
 
-const NextSessionCard = () => {
-  const { data: nextAppointment, isLoading, error } = useNextAppointment();
-  const navigate = useNavigate();
-
-  const handleScheduleClick = () => {
-    navigate('/encontrar-terapeutas');
-  };
+const TherapistNextSessionCard = () => {
+  const { data: appointments, isLoading, error } = useTherapistAppointments();
 
   if (isLoading) {
     return (
@@ -60,6 +54,9 @@ const NextSessionCard = () => {
     );
   }
 
+  // Pegar a próxima sessão (primeira da lista ordenada)
+  const nextAppointment = appointments?.[0];
+
   if (!nextAppointment) {
     return (
       <Card>
@@ -74,9 +71,9 @@ const NextSessionCard = () => {
             <p className="text-sm text-muted-foreground">
               Nenhuma sessão agendada
             </p>
-            <Button size="sm" className="w-full" onClick={handleScheduleClick}>
-              Encontrar Terapeutas
-            </Button>
+            <p className="text-xs text-muted-foreground">
+              Seus pacientes podem agendar através do seu perfil
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -124,12 +121,12 @@ const NextSessionCard = () => {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Therapist Info */}
+        {/* Patient Info */}
         <div className="flex items-center space-x-3">
           <Avatar className="h-10 w-10">
             <AvatarImage 
-              src={nextAppointment.terapeutas?.foto_url} 
-              alt={nextAppointment.terapeutas?.nome} 
+              src={nextAppointment.profiles?.avatar_url} 
+              alt={nextAppointment.profiles?.nome} 
             />
             <AvatarFallback>
               <User className="h-4 w-4" />
@@ -137,10 +134,10 @@ const NextSessionCard = () => {
           </Avatar>
           <div>
             <p className="text-sm font-medium">
-              {nextAppointment.terapeutas?.nome || 'Terapeuta'}
+              {nextAppointment.profiles?.nome || 'Paciente'}
             </p>
             <p className="text-xs text-muted-foreground">
-              {nextAppointment.terapeutas?.especialidades?.[0] || 'Psicólogo'}
+              Paciente
             </p>
           </div>
         </div>
@@ -180,7 +177,7 @@ const NextSessionCard = () => {
           {isToday && nextAppointment.session_type === 'online' && nextAppointment.status === 'confirmed' ? (
             <Button size="sm" className="flex-1">
               <Video className="h-4 w-4 mr-2" />
-              Entrar na Sessão
+              Iniciar Sessão
             </Button>
           ) : (
             <Button variant="outline" size="sm" className="flex-1">
@@ -197,4 +194,4 @@ const NextSessionCard = () => {
   );
 };
 
-export default NextSessionCard;
+export default TherapistNextSessionCard;

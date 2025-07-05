@@ -18,7 +18,6 @@ import TherapistDashboard from "./pages/TherapistDashboard";
 import TherapistProfile from "./pages/TherapistProfile";
 import NotFound from "./pages/NotFound";
 import TherapistDetail from "./pages/TherapistDetail";
-import SchedulingPage from "./pages/SchedulingPage";
 import PaymentMethodPage from "./pages/PaymentMethodPage";
 import CreditCardCheckoutPage from "./pages/CreditCardCheckoutPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
@@ -128,14 +127,6 @@ const App = () => (
               element={
                 <ProtectedRoute requireAuth={true}>
                   <TherapistProfile isFirstTimeSetup={false} />
-                </ProtectedRoute>
-              }
-            />
-            <Route 
-              path="/agendar/:terapeutaId"
-              element={
-                <ProtectedRoute requireAuth={true}>
-                  <SchedulingPage />
                 </ProtectedRoute>
               }
             />
