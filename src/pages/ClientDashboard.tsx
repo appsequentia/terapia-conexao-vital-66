@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import NextSessionCard from '@/components/dashboard/NextSessionCard';
 import FutureAppointmentsList from '@/components/dashboard/FutureAppointmentsList';
 import SessionHistory from '@/components/dashboard/SessionHistory';
+import MessagesWidget from '@/components/dashboard/MessagesWidget';
 
 const ClientDashboard = () => {
   const { profile } = useAuth();
@@ -30,20 +31,7 @@ const ClientDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <NextSessionCard />
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Mensagens
-              </CardTitle>
-              <MessageCircle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                Nenhuma mensagem nova
-              </p>
-            </CardContent>
-          </Card>
+          <MessagesWidget />
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
