@@ -10,10 +10,16 @@ import { cn } from '@/lib/utils';
 const MessagesWidget = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { unreadCount, loading: unreadLoading } = useUnreadMessages(user?.id || null);
-  const { chats, loading: chatsLoading } = useUserChats(user?.id || null);
+  const { unreadCount, loading: unreadLoading, error: unreadError } = useUnreadMessages(user?.id || null);
+  const { chats, loading: chatsLoading, error: chatsError } = useUserChats(user?.id || null);
 
   const handleClick = () => {
+    // Se há erro ou Firebase não configurado, redirecionar para encontrar terapeutas
+    if (unreadError || chatsError) {
+      navigate('/encontrar-terapeutas');
+      return;
+    }
+
     if (chats.length === 0) {
       // Nenhuma conversa, redirecionar para encontrar terapeutas
       navigate('/encontrar-terapeutas');
@@ -21,7 +27,7 @@ const MessagesWidget = () => {
       // Uma conversa, ir direto para ela
       navigate(`/chat/${chats[0].id}`);
     } else {
-      // Múltiplas conversas, ir para a primeira ou criar página de lista
+      // Múltiplas conversas, ir para a primeira
       navigate(`/chat/${chats[0].id}`);
     }
   };
@@ -55,6 +61,13 @@ const MessagesWidget = () => {
             <Loader2 className="h-4 w-4 animate-spin" />
             <span className="text-sm text-muted-foreground">Carregando...</span>
           </div>
+        ) : unreadError || chatsError ? (
+          <>
+            <div className="text-2xl font-bold">-</div>
+            <p className="text-xs text-muted-foreground">
+              Configure o Firebase para ver mensagens
+            </p>
+          </>
         ) : (
           <>
             <div className="text-2xl font-bold">

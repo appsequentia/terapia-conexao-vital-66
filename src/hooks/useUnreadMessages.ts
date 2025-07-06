@@ -17,64 +17,62 @@ export const useUnreadMessages = (userId: string | null) => {
   useEffect(() => {
     if (!userId || !db) {
       setLoading(false);
+      setUnreadCount(0);
       return;
     }
 
     let unsubscribes: (() => void)[] = [];
 
     try {
-      // Primeiro, buscar todos os chats do usuário
+      // Buscar todos os chats do usuário
       const chatsCollection = collection(db, 'chats');
       const chatsQuery = query(
         chatsCollection,
         where('participants', 'array-contains', userId)
       );
 
-      const chatsUnsubscribe = onSnapshot(chatsQuery, (chatsSnapshot) => {
-        // Limpar listeners anteriores de mensagens
+      const chatsUnsubscribe = onSnapshot(chatsQuery, async (chatsSnapshot) => {
+        // Limpar listeners anteriores
         unsubscribes.forEach(unsub => unsub());
         unsubscribes = [];
 
-        let totalUnread = 0;
-        let pendingCounts = chatsSnapshot.docs.length;
-
-        if (pendingCounts === 0) {
+        if (chatsSnapshot.docs.length === 0) {
           setUnreadCount(0);
           setLoading(false);
           return;
         }
 
-        chatsSnapshot.docs.forEach((chatDoc) => {
-          const messagesCollection = collection(db, 'chats', chatDoc.id, 'messages');
-          
-          // Buscar mensagens não enviadas pelo usuário atual (não lidas)
-          const messagesQuery = query(
-            messagesCollection,
-            where('senderId', '!=', userId),
-            orderBy('senderId'),
-            orderBy('timestamp', 'desc')
-          );
-
-          const messageUnsubscribe = onSnapshot(messagesQuery, (messagesSnapshot) => {
-            const chatUnreadCount = messagesSnapshot.docs.length;
-            totalUnread += chatUnreadCount;
+        let totalUnread = 0;
+        const promises = chatsSnapshot.docs.map(async (chatDoc) => {
+          try {
+            const messagesCollection = collection(db, 'chats', chatDoc.id, 'messages');
             
-            pendingCounts--;
-            if (pendingCounts === 0) {
-              setUnreadCount(totalUnread);
-              setLoading(false);
-            }
-          }, (err) => {
-            console.error(`Error fetching messages for chat ${chatDoc.id}:`, err);
-            pendingCounts--;
-            if (pendingCounts === 0) {
-              setUnreadCount(totalUnread);
-              setLoading(false);
-            }
-          });
+            // Buscar mensagens não enviadas pelo usuário atual
+            const messagesQuery = query(
+              messagesCollection,
+              where('senderId', '!=', userId),
+              orderBy('senderId'),
+              orderBy('timestamp', 'desc')
+            );
 
-          unsubscribes.push(messageUnsubscribe);
+            const messagesSnapshot = await getDocs(messagesQuery);
+            return messagesSnapshot.docs.length;
+          } catch (err) {
+            console.error(`Error counting messages for chat ${chatDoc.id}:`, err);
+            return 0;
+          }
         });
+
+        try {
+          const counts = await Promise.all(promises);
+          totalUnread = counts.reduce((sum, count) => sum + count, 0);
+          setUnreadCount(totalUnread);
+          setLoading(false);
+        } catch (err) {
+          console.error('Error calculating total unread:', err);
+          setUnreadCount(0);
+          setLoading(false);
+        }
       }, (err) => {
         console.error('Error fetching chats for unread count:', err);
         setError('Erro ao carregar mensagens não lidas');

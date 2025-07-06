@@ -30,6 +30,7 @@ export const useUserChats = (userId: string | null) => {
   useEffect(() => {
     if (!userId || !db) {
       setLoading(false);
+      setChats([]);
       return;
     }
 
@@ -41,24 +42,28 @@ export const useUserChats = (userId: string | null) => {
       );
 
       const unsubscribe = onSnapshot(q, async (querySnapshot) => {
-        const fetchedChats: ChatInfo[] = [];
+        if (querySnapshot.docs.length === 0) {
+          setChats([]);
+          setLoading(false);
+          return;
+        }
 
-        for (const doc of querySnapshot.docs) {
+        const promises = querySnapshot.docs.map(async (doc) => {
           const chatData = doc.data();
           
-          // Buscar última mensagem
-          const messagesCollection = collection(db, 'chats', doc.id, 'messages');
-          const messagesQuery = query(
-            messagesCollection,
-            orderBy('timestamp', 'desc'),
-            limit(1)
-          );
-          
           try {
+            // Buscar última mensagem
+            const messagesCollection = collection(db, 'chats', doc.id, 'messages');
+            const messagesQuery = query(
+              messagesCollection,
+              orderBy('timestamp', 'desc'),
+              limit(1)
+            );
+            
             const messagesSnapshot = await getDocs(messagesQuery);
             const lastMessage = messagesSnapshot.docs[0]?.data();
 
-            const chatInfo: ChatInfo = {
+            return {
               id: doc.id,
               participants: chatData.participants || [],
               lastMessage: lastMessage ? {
@@ -66,21 +71,26 @@ export const useUserChats = (userId: string | null) => {
                 senderId: lastMessage.senderId,
                 timestamp: lastMessage.timestamp,
               } : undefined,
-            };
-
-            fetchedChats.push(chatInfo);
+            } as ChatInfo;
           } catch (msgError) {
             console.error('Error fetching messages for chat:', doc.id, msgError);
-            // Adicionar chat mesmo sem última mensagem
-            fetchedChats.push({
+            // Retornar chat mesmo sem última mensagem
+            return {
               id: doc.id,
               participants: chatData.participants || [],
-            });
+            } as ChatInfo;
           }
-        }
+        });
 
-        setChats(fetchedChats);
-        setLoading(false);
+        try {
+          const fetchedChats = await Promise.all(promises);
+          setChats(fetchedChats);
+          setLoading(false);
+        } catch (err) {
+          console.error('Error processing chats:', err);
+          setError('Erro ao processar conversas');
+          setLoading(false);
+        }
       }, (err) => {
         console.error('Error fetching user chats:', err);
         setError('Erro ao carregar conversas');
