@@ -188,9 +188,6 @@ const NextSessionCard = () => {
               Enviar Mensagem
             </Button>
           )}
-          <Button variant="outline" size="sm">
-            Ver Detalhes
-          </Button>
         </div>
       </CardContent>
     </Card>
