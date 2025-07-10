@@ -7,10 +7,12 @@ import { Calendar, Clock, Video, MapPin, MessageCircle, User } from 'lucide-reac
 import { useTherapistAppointments } from '@/hooks/useTherapistAppointments';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useCreateOrFindChat } from '@/hooks/useCreateOrFindChat';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const TherapistNextSessionCard = () => {
   const { data: appointments, isLoading, error } = useTherapistAppointments();
+  const { startChatWithClient } = useCreateOrFindChat();
 
   if (isLoading) {
     return (
@@ -107,6 +109,13 @@ const TherapistNextSessionCard = () => {
     }
   };
 
+  const handleSendMessage = () => {
+    if (nextAppointment?.client_id) {
+      // Em um app real, você pegaria o nome do cliente do banco de dados
+      startChatWithClient(nextAppointment.client_id, 'Cliente');
+    }
+  };
+
   return (
     <Card className="border-l-4 border-l-primary">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -176,7 +185,7 @@ const TherapistNextSessionCard = () => {
               Iniciar Sessão
             </Button>
           ) : (
-            <Button variant="outline" size="sm" className="flex-1">
+            <Button variant="outline" size="sm" className="flex-1" onClick={handleSendMessage}>
               <MessageCircle className="h-4 w-4 mr-2" />
               Enviar Mensagem
             </Button>

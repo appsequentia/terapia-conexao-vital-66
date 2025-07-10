@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { db, auth } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   collection,
   query,
@@ -20,9 +21,13 @@ export interface Message {
 export const useChat = (chatId: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (!chatId) return;
+    if (!chatId || !db) {
+      setLoading(false);
+      return;
+    }
 
     const messagesCollection = collection(db, 'chats', chatId, 'messages');
     const q = query(messagesCollection, orderBy('timestamp', 'asc'));
@@ -46,13 +51,13 @@ export const useChat = (chatId: string) => {
   }, [chatId]);
 
   const sendMessage = async (text: string) => {
-    if (!text.trim() || !auth.currentUser) return;
+    if (!text.trim() || !user || !db) return;
 
     const messagesCollection = collection(db, 'chats', chatId, 'messages');
     try {
       await addDoc(messagesCollection, {
         text,
-        senderId: auth.currentUser.uid,
+        senderId: user.id,
         timestamp: serverTimestamp(),
       });
     } catch (error) {

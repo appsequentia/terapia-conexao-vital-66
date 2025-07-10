@@ -9,13 +9,21 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
+import { useCreateOrFindChat } from '@/hooks/useCreateOrFindChat';
 
 const NextSessionCard = () => {
   const { data: nextAppointment, isLoading, error } = useNextAppointment();
   const navigate = useNavigate();
+  const { startChatWithTherapist } = useCreateOrFindChat();
 
   const handleScheduleClick = () => {
     navigate('/encontrar-terapeutas');
+  };
+
+  const handleSendMessage = () => {
+    if (nextAppointment?.therapist_id && nextAppointment?.terapeutas?.nome) {
+      startChatWithTherapist(nextAppointment.therapist_id, nextAppointment.terapeutas.nome);
+    }
   };
 
   if (isLoading) {
@@ -183,7 +191,7 @@ const NextSessionCard = () => {
               Entrar na Sessão
             </Button>
           ) : (
-            <Button variant="outline" size="sm" className="flex-1">
+            <Button variant="outline" size="sm" className="flex-1" onClick={handleSendMessage}>
               <MessageCircle className="h-4 w-4 mr-2" />
               Enviar Mensagem
             </Button>

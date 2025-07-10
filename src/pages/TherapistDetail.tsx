@@ -9,12 +9,14 @@ import { useTherapistDetail } from '@/hooks/useTherapistDetail';
 import { useFavorites } from '@/hooks/useFavorites';
 import { cn } from '@/lib/utils';
 import { AvailabilityCalendar } from '@/components/therapist/AvailabilityCalendar';
+import { useCreateOrFindChat } from '@/hooks/useCreateOrFindChat';
 
 const TherapistDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: therapist, isLoading, error } = useTherapistDetail(id || '');
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { startChatWithTherapist } = useCreateOrFindChat();
 
   const handleToggleFavorite = () => {
     if (therapist) {
@@ -25,6 +27,12 @@ const TherapistDetail = () => {
   const handleBookAppointment = () => {
     if (therapist) {
       navigate(`/agendamento/${therapist.id}`);
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (therapist) {
+      startChatWithTherapist(therapist.id, therapist.name);
     }
   };
 
@@ -294,7 +302,7 @@ const TherapistDetail = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <Button variant="outline" className="w-full hover-scale">
+                  <Button variant="outline" className="w-full hover-scale" onClick={handleSendMessage}>
                     Enviar Mensagem
                   </Button>
                 </div>
