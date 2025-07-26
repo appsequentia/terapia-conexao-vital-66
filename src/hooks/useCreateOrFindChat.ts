@@ -44,7 +44,11 @@ export const useCreateOrFindChat = () => {
       return null;
     }
 
-    console.log('[useCreateOrFindChat] Iniciando criação/busca de chat:', { 
+    console.log('[useCreateOrFindChat] ===== INÍCIO DA FUNÇÃO =====');
+    console.log('[useCreateOrFindChat] Usuário autenticado:', user);
+    console.log('[useCreateOrFindChat] Profile:', profile);
+    console.log('[useCreateOrFindChat] Firebase DB disponível:', !!db);
+    console.log('[useCreateOrFindChat] Parâmetros:', { 
       therapistId, 
       therapistName,
       clientId,

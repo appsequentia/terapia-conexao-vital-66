@@ -10,6 +10,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { cn } from '@/lib/utils';
 import { AvailabilityCalendar } from '@/components/therapist/AvailabilityCalendar';
 import { useCreateOrFindChat } from '@/hooks/useCreateOrFindChat';
+import { useAuth } from '@/contexts/AuthContext';
 
 const TherapistDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +18,7 @@ const TherapistDetail = () => {
   const { data: therapist, isLoading, error } = useTherapistDetail(id || '');
   const { isFavorite, toggleFavorite } = useFavorites();
   const { startChatWithTherapist } = useCreateOrFindChat();
+  const { user, isAuthenticated } = useAuth();
 
   const handleToggleFavorite = () => {
     if (therapist) {
@@ -30,9 +32,31 @@ const TherapistDetail = () => {
     }
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
+    console.log('[TherapistDetail] Verificando autenticação:', { isAuthenticated, hasUser: !!user });
+    
+    if (!isAuthenticated || !user) {
+      console.log('[TherapistDetail] Usuário não autenticado, redirecionando para login');
+      navigate('/login');
+      return;
+    }
+
+    console.log('[TherapistDetail] Iniciando criação de chat com terapeuta:', therapist);
     if (therapist) {
-      startChatWithTherapist(therapist.id, therapist.name);
+      try {
+        const chatId = await startChatWithTherapist(therapist.id, therapist.name);
+        console.log('[TherapistDetail] Chat criado/encontrado:', chatId);
+        if (chatId) {
+          console.log('[TherapistDetail] Navegando para chat:', `/chat/${chatId}`);
+          navigate(`/chat/${chatId}`);
+        } else {
+          console.error('[TherapistDetail] Falha ao criar/encontrar chat');
+        }
+      } catch (error) {
+        console.error('[TherapistDetail] Erro ao criar chat:', error);
+      }
+    } else {
+      console.error('[TherapistDetail] Terapeuta não encontrado');
     }
   };
 
