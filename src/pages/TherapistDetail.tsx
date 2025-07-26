@@ -15,6 +15,11 @@ import { useAuth } from '@/contexts/AuthContext';
 const TherapistDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  
+  console.log('[TherapistDetail] ===== PARÂMETROS DA URL =====');
+  console.log('[TherapistDetail] ID from params:', id);
+  console.log('[TherapistDetail] URL atual:', window.location.href);
+  
   const { data: therapist, isLoading, error } = useTherapistDetail(id || '');
   const { isFavorite, toggleFavorite } = useFavorites();
   const { startChatWithTherapist } = useCreateOrFindChat();

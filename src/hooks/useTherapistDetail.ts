@@ -9,7 +9,14 @@ export const useTherapistDetail = (id: string) => {
   return useQuery({
     queryKey: ['therapist', id],
     queryFn: async (): Promise<TherapistProfile | null> => {
-      console.log('Fetching therapist detail for id:', id);
+      console.log('[useTherapistDetail] Fetching therapist detail for id:', id);
+      console.log('[useTherapistDetail] ID type:', typeof id);
+      console.log('[useTherapistDetail] ID length:', id?.length);
+      
+      if (!id || id.trim() === '') {
+        console.error('[useTherapistDetail] ID é vazio ou inválido');
+        return null;
+      }
       
       const { data, error } = await supabase
         .from('terapeutas')
