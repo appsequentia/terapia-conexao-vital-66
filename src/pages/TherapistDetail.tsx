@@ -11,14 +11,19 @@ import { cn } from '@/lib/utils';
 import { AvailabilityCalendar } from '@/components/therapist/AvailabilityCalendar';
 import { useCreateOrFindChat } from '@/hooks/useCreateOrFindChat';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUUIDValidation } from '@/hooks/useUUIDValidation';
 
 const TherapistDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isValidUUID } = useUUIDValidation();
   
   console.log('[TherapistDetail] ===== PARÂMETROS DA URL =====');
   console.log('[TherapistDetail] ID from params:', id);
+  console.log('[TherapistDetail] ID length:', id?.length);
+  console.log('[TherapistDetail] Is valid UUID:', isValidUUID(id || ''));
   console.log('[TherapistDetail] URL atual:', window.location.href);
+  console.log('[TherapistDetail] URL pathname:', window.location.pathname);
   
   const { data: therapist, isLoading, error } = useTherapistDetail(id || '');
   const { isFavorite, toggleFavorite } = useFavorites();

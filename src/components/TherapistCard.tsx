@@ -28,6 +28,12 @@ const TherapistCard = ({ therapist }: TherapistCardProps) => {
   });
 
   const handleViewProfile = () => {
+    console.log('[TherapistCard] ===== NAVEGAÇÃO PARA PERFIL =====');
+    console.log('[TherapistCard] therapist.id:', therapist.id);
+    console.log('[TherapistCard] ID length:', therapist.id?.length);
+    console.log('[TherapistCard] ID type:', typeof therapist.id);
+    console.log('[TherapistCard] Is valid UUID format:', /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(therapist.id || ''));
+    console.log('[TherapistCard] Navigating to:', `/terapeuta/${therapist.id}`);
     navigate(`/terapeuta/${therapist.id}`);
   };
 

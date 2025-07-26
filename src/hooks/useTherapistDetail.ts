@@ -18,6 +18,15 @@ export const useTherapistDetail = (id: string) => {
         return null;
       }
       
+      // Validar formato UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(id)) {
+        console.error('[useTherapistDetail] ❌ ID não é um UUID válido:', id);
+        console.error('[useTherapistDetail] ❌ ID length:', id.length);
+        console.error('[useTherapistDetail] ❌ Expected length: 36');
+        return null;
+      }
+      
       console.log('[useTherapistDetail] ===== EXECUTANDO QUERY =====');
       console.log('[useTherapistDetail] Query: SELECT * FROM terapeutas WHERE id =', id);
       
