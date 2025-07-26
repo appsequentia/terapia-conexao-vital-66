@@ -27,8 +27,8 @@ const MessagesWidget = () => {
       // Uma conversa, ir direto para ela
       navigate(`/chat/${chats[0].id}`);
     } else {
-      // Múltiplas conversas, ir para a primeira
-      navigate(`/chat/${chats[0].id}`);
+      // Múltiplas conversas, ir para a página de listagem
+      navigate('/chats');
     }
   };
 

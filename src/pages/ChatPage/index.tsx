@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useChat } from '@/hooks/useChat';
 import { auth, db } from '@/lib/firebase';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import Header from '@/components/Header';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 import MessageList from '@/components/chat/MessageList';
@@ -13,6 +15,7 @@ import MessageInput from '@/components/chat/MessageInput';
 
 const ChatPage: React.FC = () => {
   const { chatId } = useParams<{ chatId: string }>();
+  const navigate = useNavigate();
   const { messages, loading, sendMessage } = useChat(chatId || '');
   const { user } = useAuth();
   const [chatInfo, setChatInfo] = useState<any>(null);
@@ -62,6 +65,14 @@ const ChatPage: React.FC = () => {
       <div className="flex-1 container mx-auto p-4 flex justify-center items-center">
         <Card className="w-full max-w-3xl h-full flex flex-col">
           <CardHeader className="flex flex-row items-center gap-4 border-b">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/chats')}
+              className="p-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
             <Avatar>
               <AvatarImage src="" alt={otherParticipant?.name || 'Usuário'} />
               <AvatarFallback>

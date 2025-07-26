@@ -22,6 +22,7 @@ import PaymentMethodPage from "./pages/PaymentMethodPage";
 import CreditCardCheckoutPage from "./pages/CreditCardCheckoutPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import ChatPage from "./pages/ChatPage";
+import ChatsListPage from "./pages/ChatsListPage";
 import VideoCallPage from "./pages/VideoCallPage";
 import BookingPage from "./pages/BookingPage";
 import CheckoutPage from "./pages/CheckoutPage";
@@ -144,6 +145,14 @@ const App = () => (
               element={
                 <ProtectedRoute requireAuth={true}>
                   <PaymentSuccessPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route 
+              path="/chats"
+              element={
+                <ProtectedRoute requireAuth={true}>
+                  <ChatsListPage />
                 </ProtectedRoute>
               }
             />

@@ -70,6 +70,11 @@ const Header = () => {
             <Link to="/para-terapeutas" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium transition-colors">
               Para Terapeutas
             </Link>
+            {isAuthenticated && (
+              <Link to="/chats" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium transition-colors">
+                Mensagens
+              </Link>
+            )}
           </nav>
 
           {/* Auth Section - Always render public buttons when not authenticated */}
@@ -154,6 +159,11 @@ const Header = () => {
             <Link to="/para-terapeutas" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
               Para Terapeutas
             </Link>
+            {isAuthenticated && (
+              <Link to="/chats" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+                Mensagens
+              </Link>
+            )}
           </nav>
         </div>
       </div>
