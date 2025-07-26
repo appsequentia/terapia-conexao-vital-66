@@ -133,6 +133,19 @@ export const useCreateOrFindChat = () => {
   };
 
   const startChatWithTherapist = async (therapistId: string, therapistName: string) => {
+    console.log('[startChatWithTherapist] ===== INICIANDO CHAT COM TERAPEUTA =====');
+    console.log('[startChatWithTherapist] therapistId:', therapistId);
+    console.log('[startChatWithTherapist] therapistName:', therapistName);
+    console.log('[startChatWithTherapist] user:', user);
+    console.log('[startChatWithTherapist] user.id:', user?.id);
+    
+    if (!therapistId || !therapistName) {
+      console.error('[startChatWithTherapist] ❌ Dados do terapeuta incompletos:', { therapistId, therapistName });
+      setError('Dados do terapeuta incompletos para iniciar chat');
+      return null;
+    }
+
+    console.log('[startChatWithTherapist] ✅ Dados válidos, chamando createOrFindChat...');
     return createOrFindChat({ therapistId, therapistName });
   };
 

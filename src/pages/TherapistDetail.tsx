@@ -38,30 +38,53 @@ const TherapistDetail = () => {
   };
 
   const handleSendMessage = async () => {
-    console.log('[TherapistDetail] Verificando autenticação:', { isAuthenticated, hasUser: !!user });
+    console.log('[TherapistDetail] ===== HANDLE SEND MESSAGE =====');
+    console.log('[TherapistDetail] isAuthenticated:', isAuthenticated);
+    console.log('[TherapistDetail] user:', user);
+    console.log('[TherapistDetail] therapist data:', therapist);
+    console.log('[TherapistDetail] therapist?.id:', therapist?.id);
+    console.log('[TherapistDetail] therapist?.name:', therapist?.name);
     
     if (!isAuthenticated || !user) {
-      console.log('[TherapistDetail] Usuário não autenticado, redirecionando para login');
+      console.log('[TherapistDetail] ❌ Usuário não autenticado, redirecionando para login');
       navigate('/login');
       return;
     }
 
-    console.log('[TherapistDetail] Iniciando criação de chat com terapeuta:', therapist);
-    if (therapist) {
-      try {
-        const chatId = await startChatWithTherapist(therapist.id, therapist.name);
-        console.log('[TherapistDetail] Chat criado/encontrado:', chatId);
-        if (chatId) {
-          console.log('[TherapistDetail] Navegando para chat:', `/chat/${chatId}`);
-          navigate(`/chat/${chatId}`);
-        } else {
-          console.error('[TherapistDetail] Falha ao criar/encontrar chat');
-        }
-      } catch (error) {
-        console.error('[TherapistDetail] Erro ao criar chat:', error);
+    if (!therapist) {
+      console.error('[TherapistDetail] ❌ Therapist data not available');
+      console.error('[TherapistDetail] isLoading:', isLoading);
+      console.error('[TherapistDetail] error:', error);
+      return;
+    }
+
+    if (!therapist.id || !therapist.name) {
+      console.error('[TherapistDetail] ❌ Dados do terapeuta incompletos:', {
+        id: therapist.id,
+        name: therapist.name,
+        hasId: !!therapist.id,
+        hasName: !!therapist.name,
+        fullTherapist: therapist
+      });
+      return;
+    }
+
+    try {
+      console.log('[TherapistDetail] ✅ Dados válidos, iniciando chat...');
+      console.log('[TherapistDetail] Calling startChatWithTherapist with:', {
+        id: therapist.id,
+        name: therapist.name
+      });
+      const chatId = await startChatWithTherapist(therapist.id, therapist.name);
+      console.log('[TherapistDetail] Chat criado/encontrado:', chatId);
+      if (chatId) {
+        console.log('[TherapistDetail] Navegando para chat:', `/chat/${chatId}`);
+        navigate(`/chat/${chatId}`);
+      } else {
+        console.error('[TherapistDetail] ❌ Falha ao criar/encontrar chat - chatId nulo');
       }
-    } else {
-      console.error('[TherapistDetail] Terapeuta não encontrado');
+    } catch (error) {
+      console.error('[TherapistDetail] ❌ Erro ao criar chat:', error);
     }
   };
 

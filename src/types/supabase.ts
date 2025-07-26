@@ -22,7 +22,26 @@ export interface SupabaseTherapist {
 }
 
 export function mapSupabaseToTherapist(supabaseTherapist: SupabaseTherapist): import('./therapist').TherapistProfile {
-  console.log('Mapping Supabase therapist:', supabaseTherapist);
+  console.log('[mapSupabaseToTherapist] ===== INICIANDO MAPEAMENTO =====');
+  console.log('[mapSupabaseToTherapist] Input recebido:', supabaseTherapist);
+  console.log('[mapSupabaseToTherapist] Tipo do input:', typeof supabaseTherapist);
+  console.log('[mapSupabaseToTherapist] É objeto?', supabaseTherapist && typeof supabaseTherapist === 'object');
+  console.log('[mapSupabaseToTherapist] Tem ID?', !!supabaseTherapist?.id);
+  console.log('[mapSupabaseToTherapist] Campos disponíveis:', Object.keys(supabaseTherapist || {}));
+  
+  if (!supabaseTherapist) {
+    console.error('[mapSupabaseToTherapist] ❌ Input é nulo ou undefined');
+    throw new Error('Dados do terapeuta não fornecidos para mapeamento');
+  }
+  
+  if (!supabaseTherapist.id) {
+    console.error('[mapSupabaseToTherapist] ❌ ID do terapeuta não encontrado');
+    throw new Error('ID do terapeuta é obrigatório');
+  }
+  
+  console.log('[mapSupabaseToTherapist] ===== PROCESSANDO ESPECIALIDADES =====');
+  console.log('[mapSupabaseToTherapist] Especialidades raw:', supabaseTherapist.especialidades);
+  console.log('[mapSupabaseToTherapist] Tipo especialidades:', typeof supabaseTherapist.especialidades);
   
   // Ensure specialties is always an array and map correctly
   const specialties = (supabaseTherapist.especialidades || []).map((esp, index) => ({
@@ -30,6 +49,12 @@ export function mapSupabaseToTherapist(supabaseTherapist: SupabaseTherapist): im
     name: esp,
     category: 'other' as const
   }));
+  
+  console.log('[mapSupabaseToTherapist] Especialidades processadas:', specialties);
+
+  console.log('[mapSupabaseToTherapist] ===== PROCESSANDO ABORDAGENS =====');
+  console.log('[mapSupabaseToTherapist] Abordagens raw:', supabaseTherapist.abordagens);
+  console.log('[mapSupabaseToTherapist] Tipo abordagens:', typeof supabaseTherapist.abordagens);
 
   // Ensure approaches is always an array and map correctly  
   const approaches = (supabaseTherapist.abordagens || []).map((abr, index) => ({
@@ -41,7 +66,11 @@ export function mapSupabaseToTherapist(supabaseTherapist: SupabaseTherapist): im
       .toUpperCase()
       .slice(0, 4) // Limit to 4 characters
   }));
+  
+  console.log('[mapSupabaseToTherapist] Abordagens processadas:', approaches);
 
+  console.log('[mapSupabaseToTherapist] ===== CRIANDO OBJETO FINAL =====');
+  
   const mapped = {
     id: supabaseTherapist.id,
     name: supabaseTherapist.nome,
@@ -68,13 +97,15 @@ export function mapSupabaseToTherapist(supabaseTherapist: SupabaseTherapist): im
     updatedAt: supabaseTherapist.updated_at
   };
 
-  console.log('Mapped therapist result:', {
+  console.log('[mapSupabaseToTherapist] ===== OBJETO FINAL CRIADO =====');
+  console.log('[mapSupabaseToTherapist] ✅ Resultado final:', {
     id: mapped.id,
     name: mapped.name,
+    hasSpecialties: mapped.specialties.length > 0,
+    hasApproaches: mapped.approaches.length > 0,
     specialtiesCount: mapped.specialties.length,
     approachesCount: mapped.approaches.length,
-    specialties: mapped.specialties,
-    approaches: mapped.approaches
+    location: mapped.location
   });
   
   return mapped;

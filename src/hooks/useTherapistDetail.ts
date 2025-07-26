@@ -18,25 +18,42 @@ export const useTherapistDetail = (id: string) => {
         return null;
       }
       
+      console.log('[useTherapistDetail] ===== EXECUTANDO QUERY =====');
+      console.log('[useTherapistDetail] Query: SELECT * FROM terapeutas WHERE id =', id);
+      
       const { data, error } = await supabase
         .from('terapeutas')
         .select('*')
         .eq('id', id)
         .maybeSingle();
 
+      console.log('[useTherapistDetail] ===== RESULTADO DA QUERY =====');
+      console.log('[useTherapistDetail] Error:', error);
+      console.log('[useTherapistDetail] Data raw:', data);
+      console.log('[useTherapistDetail] Data type:', typeof data);
+      console.log('[useTherapistDetail] Data keys:', data ? Object.keys(data) : 'No data');
+
       if (error) {
-        console.error('Error fetching therapist detail:', error);
+        console.error('[useTherapistDetail] ❌ Erro na query Supabase:', error);
         throw error;
       }
 
       if (!data) {
-        console.log('Therapist not found for id:', id);
+        console.log('[useTherapistDetail] ❌ Nenhum terapeuta encontrado para ID:', id);
         return null;
       }
 
-      console.log('Fetched therapist detail:', data);
+      console.log('[useTherapistDetail] ✅ Terapeuta encontrado:', data);
+      console.log('[useTherapistDetail] ===== INICIANDO MAPEAMENTO =====');
       
-      return mapSupabaseToTherapist(data as SupabaseTherapist);
+      try {
+        const mappedResult = mapSupabaseToTherapist(data as SupabaseTherapist);
+        console.log('[useTherapistDetail] ✅ Mapeamento concluído:', mappedResult);
+        return mappedResult;
+      } catch (mappingError) {
+        console.error('[useTherapistDetail] ❌ Erro no mapeamento:', mappingError);
+        throw mappingError;
+      }
     },
     enabled: !!id,
   });
