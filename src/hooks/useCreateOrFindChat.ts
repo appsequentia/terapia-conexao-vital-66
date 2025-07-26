@@ -33,9 +33,25 @@ export const useCreateOrFindChat = () => {
     clientName 
   }: CreateOrFindChatParams) => {
     if (!user) {
+      console.error('[useCreateOrFindChat] Usuário não autenticado');
       setError('Usuário não autenticado');
       return null;
     }
+
+    if (!db) {
+      console.error('[useCreateOrFindChat] Firebase DB não disponível');
+      setError('Erro de conexão com o banco de dados');
+      return null;
+    }
+
+    console.log('[useCreateOrFindChat] Iniciando criação/busca de chat:', { 
+      therapistId, 
+      therapistName,
+      clientId,
+      clientName,
+      currentUserId: user.id,
+      userType: profile?.tipo_usuario 
+    });
 
     setLoading(true);
     setError(null);
@@ -45,8 +61,11 @@ export const useCreateOrFindChat = () => {
       const otherUserId = profile?.tipo_usuario === 'therapist' ? clientId : therapistId;
       
       if (!otherUserId) {
+        console.error('[useCreateOrFindChat] ID do usuário de destino não encontrado');
         throw new Error('ID do usuário de destino não encontrado');
       }
+
+      console.log('[useCreateOrFindChat] IDs definidos:', { currentUserId, otherUserId });
 
       // Buscar chat existente
       const chatsRef = collection(db, 'chats');
@@ -58,20 +77,25 @@ export const useCreateOrFindChat = () => {
       const querySnapshot = await getDocs(q);
       let existingChatId = null;
 
+      console.log('[useCreateOrFindChat] Chats encontrados:', querySnapshot.docs.length);
+
       querySnapshot.forEach((doc) => {
         const chatData = doc.data();
         if (chatData.participants.includes(otherUserId)) {
           existingChatId = doc.id;
+          console.log('[useCreateOrFindChat] Chat existente encontrado:', existingChatId);
         }
       });
 
       // Se chat já existe, navegar para ele
       if (existingChatId) {
+        console.log('[useCreateOrFindChat] Navegando para chat existente:', existingChatId);
         navigate(`/chat/${existingChatId}`);
         return existingChatId;
       }
 
       // Criar novo chat
+      console.log('[useCreateOrFindChat] Criando novo chat...');
       const newChatData = {
         participants: [currentUserId, otherUserId],
         participantNames: {
@@ -87,14 +111,16 @@ export const useCreateOrFindChat = () => {
         lastMessageAt: null
       };
 
+      console.log('[useCreateOrFindChat] Dados do novo chat:', newChatData);
       const newChatRef = await addDoc(chatsRef, newChatData);
+      console.log('[useCreateOrFindChat] Novo chat criado com ID:', newChatRef.id);
       
       // Navegar para o novo chat
       navigate(`/chat/${newChatRef.id}`);
       return newChatRef.id;
 
     } catch (err) {
-      console.error('Erro ao criar/encontrar chat:', err);
+      console.error('[useCreateOrFindChat] Erro ao criar/encontrar chat:', err);
       setError('Erro ao iniciar conversa. Tente novamente.');
       return null;
     } finally {

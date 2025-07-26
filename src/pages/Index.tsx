@@ -7,9 +7,12 @@ import TherapistCard from '@/components/TherapistCard';
 import { useTherapists } from '@/hooks/useTherapists';
 import { Button } from '@/components/ui/button';
 import { Heart, Shield, Clock, Star } from 'lucide-react';
+import ChatTestPanel from '@/components/chat/ChatTestPanel';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
   const { data: therapists = [], isLoading, error } = useTherapists();
+  const { user } = useAuth();
 
   console.log('Index - Component state:', {
     therapistsCount: therapists.length,
@@ -25,6 +28,15 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      
+      {/* Debug Panel - Mostrar apenas para usuários logados */}
+      {user && (
+        <section className="py-4 px-4 sm:px-6 lg:px-8 bg-yellow-50 border-b border-yellow-200">
+          <div className="max-w-7xl mx-auto">
+            <ChatTestPanel />
+          </div>
+        </section>
+      )}
       
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary to-primary-600 text-white py-20">

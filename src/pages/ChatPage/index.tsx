@@ -20,27 +20,36 @@ const ChatPage: React.FC = () => {
 
   useEffect(() => {
     const loadChatInfo = async () => {
-      if (!chatId || !user) return;
+      if (!chatId || !user) {
+        console.log('[ChatPage] Dados insuficientes para carregar chat:', { chatId, hasUser: !!user });
+        return;
+      }
 
       try {
+        console.log('[ChatPage] Carregando informações do chat:', chatId);
         // Carregar informações do chat
         const chatDoc = await getDoc(doc(db, 'chats', chatId));
         if (chatDoc.exists()) {
           const chatData = chatDoc.data();
+          console.log('[ChatPage] Dados do chat carregados:', chatData);
           setChatInfo(chatData);
           
           // Encontrar o outro participante
           const otherUserId = chatData.participants.find((id: string) => id !== user.id);
           if (otherUserId && chatData.participantNames) {
-            setOtherParticipant({
+            const participantInfo = {
               id: otherUserId,
               name: chatData.participantNames[otherUserId] || 'Usuário',
               type: chatData.participantTypes?.[otherUserId] || 'client'
-            });
+            };
+            console.log('[ChatPage] Informações do outro participante:', participantInfo);
+            setOtherParticipant(participantInfo);
           }
+        } else {
+          console.error('[ChatPage] Chat não encontrado:', chatId);
         }
       } catch (error) {
-        console.error('Erro ao carregar informações do chat:', error);
+        console.error('[ChatPage] Erro ao carregar informações do chat:', error);
       }
     };
 
