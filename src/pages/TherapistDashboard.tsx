@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTherapistProfileCheck } from '@/hooks/useTherapistProfileCheck';
 import DashboardStatsCards from '@/components/dashboard/DashboardStatsCards';
 import TherapistCalendar from '@/components/dashboard/TherapistCalendar';
+import TherapistAppointmentsList from '@/components/dashboard/TherapistAppointmentsList';
 import ClientsList from '@/components/dashboard/ClientsList';
 import FinancialSummary from '@/components/dashboard/FinancialSummary';
 import AvailabilityManager from '@/components/availability/AvailabilityManager';
@@ -131,6 +132,7 @@ const TherapistDashboard = () => {
 
           <TabsContent value="agenda" className="space-y-6">
             <TherapistCalendar />
+            <TherapistAppointmentsList />
           </TabsContent>
 
           <TabsContent value="disponibilidade" className="space-y-6">
