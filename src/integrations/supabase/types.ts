@@ -14,7 +14,293 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          appointment_date: string
+          client_id: string
+          created_at: string
+          end_time: string
+          id: string
+          meeting_link: string | null
+          notes: string | null
+          payment_status: string
+          session_type: string
+          start_time: string
+          status: string
+          therapist_id: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_date: string
+          client_id: string
+          created_at?: string
+          end_time: string
+          id?: string
+          meeting_link?: string | null
+          notes?: string | null
+          payment_status?: string
+          session_type: string
+          start_time: string
+          status?: string
+          therapist_id: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_date?: string
+          client_id?: string
+          created_at?: string
+          end_time?: string
+          id?: string
+          meeting_link?: string | null
+          notes?: string | null
+          payment_status?: string
+          session_type?: string
+          start_time?: string
+          status?: string
+          therapist_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_therapist_id_fkey"
+            columns: ["therapist_id"]
+            isOneToOne: false
+            referencedRelation: "terapeutas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      availability_events: {
+        Row: {
+          created_at: string
+          end_time: string
+          event_date: string
+          event_type: string
+          id: string
+          is_active: boolean | null
+          reason: string | null
+          start_time: string
+          therapist_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          event_date: string
+          event_type: string
+          id?: string
+          is_active?: boolean | null
+          reason?: string | null
+          start_time: string
+          therapist_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          event_date?: string
+          event_type?: string
+          id?: string
+          is_active?: boolean | null
+          reason?: string | null
+          start_time?: string
+          therapist_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_events_therapist_id_fkey"
+            columns: ["therapist_id"]
+            isOneToOne: false
+            referencedRelation: "terapeutas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      availability_slots: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          is_active: boolean | null
+          start_time: string
+          therapist_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          is_active?: boolean | null
+          start_time: string
+          therapist_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          is_active?: boolean | null
+          start_time?: string
+          therapist_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_slots_therapist_id_fkey"
+            columns: ["therapist_id"]
+            isOneToOne: false
+            referencedRelation: "terapeutas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      holidays: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          reason: string | null
+          start_date: string
+          therapist_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          reason?: string | null
+          start_date: string
+          therapist_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          reason?: string | null
+          start_date?: string
+          therapist_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holidays_therapist_id_fkey"
+            columns: ["therapist_id"]
+            isOneToOne: false
+            referencedRelation: "terapeutas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          genero: string | null
+          id: string
+          nome: string
+          telefone: string | null
+          tipo_usuario: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          genero?: string | null
+          id: string
+          nome: string
+          telefone?: string | null
+          tipo_usuario: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          genero?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+          tipo_usuario?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      terapeutas: {
+        Row: {
+          abordagens: string[]
+          aceita_online: boolean | null
+          aceita_presencial: boolean | null
+          anos_experiencia: number | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          crp: string | null
+          email: string
+          especialidades: string[]
+          formacao: string[] | null
+          id: string
+          idiomas: string[] | null
+          localizacao: string | null
+          nome: string
+          preco_sessao: number
+          rating: number | null
+          total_avaliacoes: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          abordagens?: string[]
+          aceita_online?: boolean | null
+          aceita_presencial?: boolean | null
+          anos_experiencia?: number | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          crp?: string | null
+          email: string
+          especialidades?: string[]
+          formacao?: string[] | null
+          id?: string
+          idiomas?: string[] | null
+          localizacao?: string | null
+          nome: string
+          preco_sessao?: number
+          rating?: number | null
+          total_avaliacoes?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          abordagens?: string[]
+          aceita_online?: boolean | null
+          aceita_presencial?: boolean | null
+          anos_experiencia?: number | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          crp?: string | null
+          email?: string
+          especialidades?: string[]
+          formacao?: string[] | null
+          id?: string
+          idiomas?: string[] | null
+          localizacao?: string | null
+          nome?: string
+          preco_sessao?: number
+          rating?: number | null
+          total_avaliacoes?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
