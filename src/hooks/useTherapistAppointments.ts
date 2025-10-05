@@ -30,11 +30,30 @@ export const useTherapistAppointments = (dateFilter?: string) => {
 
       console.log('Fetching therapist appointments for user:', user.id, 'date:', dateFilter);
 
-      // Primeiro, buscar os agendamentos
+      // Primeiro, buscar o terapeuta pelo user_id
+      const { data: therapist, error: therapistError } = await supabase
+        .from('terapeutas')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (therapistError) {
+        console.error('Error fetching therapist:', therapistError);
+        throw therapistError;
+      }
+
+      if (!therapist) {
+        console.log('No therapist found for user:', user.id);
+        return [];
+      }
+
+      console.log('Therapist found:', therapist.id);
+
+      // Agora buscar os agendamentos usando o therapist_id correto
       let appointmentsQuery = supabase
         .from('appointments')
         .select('*')
-        .eq('therapist_id', user.id)
+        .eq('therapist_id', therapist.id)
         .order('appointment_date', { ascending: true })
         .order('start_time', { ascending: true });
 
